@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register</title>
+</head>
+<body>
+    <h1>Create Account</h1>
+    <form method="POST">
+        <label>Username</label><br>
+        <input type="text" name="username" required><br><br>
+        <label>Password</label><br>
+        <input type="password" name="password" required><br>
+        <small style="color:gray">Password must be at least 8 characters, include 1 uppercase letter, 1 number, and 1 special character (e.g. !@#$%)</small><br><br>
+        <label>Confirm Password</label><br>
+        <input type="password" name="confirm_password" required><br><br>
+        <button type="submit">Register</button>
+    </form>
+    <p>Already have an account? <a href="/">Login here</a></p>
+    {% if error %}
+        <p style="color:red">{{ error }}</p>
+    {% endif %}
+</body>
+</html>

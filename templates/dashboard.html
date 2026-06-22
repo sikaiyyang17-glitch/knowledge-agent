@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Knowledge Agent</title>
+</head>
+<body>
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #ccc;">
+        <h2>Knowledge Agent</h2>
+        <a href="/logout"><button>Logout</button></a>
+    </div>
+
+    <div style="max-width:800px; margin:20px auto; padding:0 20px;">
+        <div id="chat-box" style="height:500px; overflow-y:auto; border:1px solid #ccc; padding:15px; margin-bottom:15px; border-radius:5px;">
+            <p style="color:gray">Start a conversation below...</p>
+        </div>
+
+        <div style="display:flex; gap:10px;">
+            <input 
+                type="text" 
+                id="user-input" 
+                placeholder="Type your message..." 
+                style="flex:1; padding:10px; border:1px solid #ccc; border-radius:5px;"
+            >
+            <button onclick="sendMessage()" style="padding:10px 20px;">Send</button>
+        </div>
+    </div>
+
+    <script>
+        async function sendMessage() {
+            const input = document.getElementById('user-input');
+            const chatBox = document.getElementById('chat-box');
+            const message = input.value.trim();
+            if (!message) return;
+
+            // Show user message
+            chatBox.innerHTML += `<p><strong>You:</strong> ${message}</p>`;
+            input.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // Send to Flask and get response
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: message })
+            });
+            const data = await response.json();
+
+            // Show AI response
+            chatBox.innerHTML += `<p><strong>Agent:</strong> ${data.response}</p>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // Allow pressing Enter to send
+        document.getElementById('user-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') sendMessage();
+        });
+    </script>
+</body>
+</html>
