@@ -2,58 +2,270 @@
 <html>
 <head>
     <title>Knowledge Agent</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; display: flex; height: 100vh; overflow: hidden; }
+
+        #sidebar {
+            width: 260px;
+            background: #f4f4f4;
+            border-right: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+            height: 100vh;
+        }
+        #sidebar h2 { font-size: 16px; margin-bottom: 12px; }
+        #new-chat-btn {
+            background: #000;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-bottom: 12px;
+            font-size: 14px;
+            width: 100%;
+        }
+        #new-chat-btn:hover { background: #333; }
+        #conversation-list { flex: 1; overflow-y: auto; }
+        .conv-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 10px;
+            border-radius: 6px;
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+        .conv-item:hover { background: #e0e0e0; }
+        .conv-item.active { background: #ddd; font-weight: bold; }
+        .conv-link { text-decoration: none; color: black; flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 0 4px;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+        .delete-btn:hover { color: red; }
+        #sidebar-footer { border-top: 1px solid #ddd; padding-top: 12px; margin-top: 12px; }
+        #sidebar-footer a { font-size: 13px; color: #666; text-decoration: none; }
+        #sidebar-footer a:hover { color: black; }
+
+        #main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+        #chat-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #ddd;
+            font-size: 18px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        #mode-toggle { display: flex; gap: 8px; }
+        .mode-btn {
+            padding: 6px 14px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            background: white;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .mode-btn.active { background: #000; color: white; border-color: #000; }
+        #messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .message {
+            max-width: 70%;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 14px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+        .message.user { background: #000; color: white; align-self: flex-end; }
+        .message.agent { background: #f0f0f0; color: black; align-self: flex-start; }
+        #input-area {
+            padding: 16px 20px;
+            border-top: 1px solid #ddd;
+            display: flex;
+            gap: 10px;
+            flex-shrink: 0;
+            background: white;
+        }
+        #message-input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+        }
+        #send-btn {
+            background: #000;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        #send-btn:hover { background: #333; }
+        #empty-state {
+            color: #aaa;
+            font-size: 15px;
+            text-align: center;
+            margin-top: 40px;
+        }
+        #header-controls { display: flex; align-items: center; gap: 12px; }
+        #model-selector {
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            outline: none;
+            background: white;
+        }
+    </style>
 </head>
 <body>
-    <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #ccc;">
-        <h2>Knowledge Agent</h2>
-        <a href="/logout"><button>Logout</button></a>
-    </div>
 
-    <div style="max-width:800px; margin:20px auto; padding:0 20px;">
-        <div id="chat-box" style="height:500px; overflow-y:auto; border:1px solid #ccc; padding:15px; margin-bottom:15px; border-radius:5px;">
-            <p style="color:gray">Start a conversation below...</p>
+<div id="sidebar">
+    <h2>Knowledge Agent</h2>
+    <button id="new-chat-btn" onclick="window.location.href='/conversation/new'">+ New Chat</button>
+    <div id="conversation-list">
+        {% for conv in conversations %}
+        <div class="conv-item {% if active_conversation and conv.id == active_conversation.id %}active{% endif %}">
+            <a class="conv-link" href="/dashboard/{{ conv.id }}">{{ conv.title }}</a>
+            <button class="delete-btn" onclick="event.preventDefault(); deleteConv({{ conv.id }})">×</button>
         </div>
+        {% endfor %}
+    </div>
+    <div id="sidebar-footer">
+        <a href="/logout">Logout</a>
+    </div>
+</div>
 
-        <div style="display:flex; gap:10px;">
-            <input 
-                type="text" 
-                id="user-input" 
-                placeholder="Type your message..." 
-                style="flex:1; padding:10px; border:1px solid #ccc; border-radius:5px;"
-            >
-            <button onclick="sendMessage()" style="padding:10px 20px;">Send</button>
+<div id="main">
+    <div id="chat-header">
+        <span>{% if active_conversation %}{{ active_conversation.title }}{% else %}Knowledge Agent{% endif %}</span>
+        <div id="header-controls">
+            <div id="mode-toggle">
+                <button id="btn-chat" class="mode-btn active" onclick="setMode('chat')">💬 Chat</button>
+                <button id="btn-knowledge" class="mode-btn" onclick="setMode('knowledge')">📚 Knowledge</button>
+            </div>
+            <select id="model-selector">
+                <option value="gemini">🌐 Google Gemini</option>
+                <option value="groq">⚡ Groq Llama</option>
+                <option value="ollama">🦙 Ollama (Offline)</option>
+            </select>
         </div>
     </div>
+    <div id="messages">
+        {% if not active_conversation %}
+        <p id="empty-state">Click "+ New Chat" to start a conversation</p>
+        {% else %}
+            {% for msg in messages %}
+            <div class="message {{ msg.role }}">{{ msg.content }}</div>
+            {% endfor %}
+        {% endif %}
+    </div>
+    <div id="input-area">
+        <input type="text" id="message-input" placeholder="Type your message..."
+               {% if not active_conversation %}disabled{% endif %}>
+        <button id="send-btn" onclick="sendMessage()"
+                {% if not active_conversation %}disabled{% endif %}>Send</button>
+    </div>
+</div>
 
-    <script>
-        async function sendMessage() {
-            const input = document.getElementById('user-input');
-            const chatBox = document.getElementById('chat-box');
-            const message = input.value.trim();
-            if (!message) return;
+<script>
+    const conversationId = {{ active_conversation.id if active_conversation else 'null' }};
+    let currentMode = 'chat';
 
-            // Show user message
-            chatBox.innerHTML += `<p><strong>You:</strong> ${message}</p>`;
-            input.value = '';
-            chatBox.scrollTop = chatBox.scrollHeight;
+    document.getElementById('message-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') sendMessage();
+    });
 
-            // Send to Flask and get response
-            const response = await fetch('/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: message })
-            });
-            const data = await response.json();
+    function setMode(mode) {
+        currentMode = mode;
+        document.getElementById('btn-chat').classList.toggle('active', mode === 'chat');
+        document.getElementById('btn-knowledge').classList.toggle('active', mode === 'knowledge');
+    }
 
-            // Show AI response
-            chatBox.innerHTML += `<p><strong>Agent:</strong> ${data.response}</p>`;
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
+    function sendMessage() {
+        const input = document.getElementById('message-input');
+        const message = input.value.trim();
+        if (!message || !conversationId) return;
 
-        // Allow pressing Enter to send
-        document.getElementById('user-input').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') sendMessage();
+        appendMessage('user', message);
+        input.value = '';
+        input.disabled = true;
+        document.getElementById('send-btn').disabled = true;
+
+        fetch('/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: message, conversation_id: conversationId, model: document.getElementById('model-selector').value })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.response) {
+                appendMessage('agent', data.response);
+            } else {
+                const modelName = document.getElementById('model-selector').options[document.getElementById('model-selector').selectedIndex].text;
+                appendMessage('agent', `⚠️ ${modelName} is currently unavailable. Please try the following:\n\n• Check your internet connection\n• Switch to a different model using the selector above\n• If using Ollama, make sure the Ollama app is running\n• Try again in a few moments`);
+            }
+        })
+        .catch(() => {
+            const modelName = document.getElementById('model-selector').options[document.getElementById('model-selector').selectedIndex].text;
+            appendMessage('agent', `⚠️ ${modelName} is currently unavailable. Please try the following:\n\n• Check your internet connection\n• Switch to a different model using the selector above\n• If using Ollama, make sure the Ollama app is running\n• Try again in a few moments`);
+        })
+        .catch(() => {
+            appendMessage('agent', 'Connection error. Please try again.');
+        })
+        .finally(() => {
+            input.disabled = false;
+            document.getElementById('send-btn').disabled = false;
+            input.focus();
         });
-    </script>
+    }
+
+    function appendMessage(role, content) {
+        const messages = document.getElementById('messages');
+        const div = document.createElement('div');
+        div.className = 'message ' + role;
+        div.innerHTML = content
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/^### (.*$)/gm, '<br><strong>$1</strong><br>')
+            .replace(/^\* /gm, '• ')
+            .replace(/\n/g, '<br>');
+        messages.appendChild(div);
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    function deleteConv(id) {
+        if (confirm('Delete this conversation?')) {
+            window.location.href = '/conversation/' + id + '/delete';
+        }
+    }
+</script>
+
 </body>
 </html>
