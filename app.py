@@ -1,3 +1,5 @@
+from fileinput import filename
+
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
@@ -8,6 +10,116 @@ import bcrypt
 import os
 
 load_dotenv()
+
+def extract_text(filepath, filename):
+    ext = filename.rsplit('.', 1)[-1].lower()
+    try:
+        if ext in ['txt', 'md']:
+            with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+                return f.read()
+
+        elif ext in ['html', 'htm']:
+            with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+                from markdownify import markdownify
+                return markdownify(f.read())
+
+        elif ext in ['json']:
+            import json
+            with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+                data = json.load(f)
+                return f"```json\n{json.dumps(data, indent=2)}\n```"
+
+        elif ext in ['xml', 'csv']:
+            with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+                return f.read()
+
+        elif ext == 'pdf':
+            import fitz
+            doc = fitz.open(filepath)
+            lines = []
+            for page in doc:
+                blocks = page.get_text('dict')['blocks']
+                for block in blocks:
+                    if block['type'] == 0:
+                        for line in block['lines']:
+                            text = ' '.join([s['text'] for s in line['spans']]).strip()
+                            if not text:
+                                continue
+                            # Detect headings by font size
+                            size = line['spans'][0]['size'] if line['spans'] else 0
+                            if size >= 16:
+                                lines.append(f"\n# {text}")
+                            elif size >= 13:
+                                lines.append(f"\n## {text}")
+                            else:
+                                lines.append(text)
+                lines.append('\n')
+            return '\n'.join(lines)
+
+        elif ext == 'docx':
+            from docx import Document
+            doc = Document(filepath)
+            lines = []
+            for para in doc.paragraphs:
+                if not para.text.strip():
+                    continue
+                style = para.style.name.lower()
+                if 'heading 1' in style:
+                    lines.append(f"\n# {para.text}")
+                elif 'heading 2' in style:
+                    lines.append(f"\n## {para.text}")
+                elif 'heading 3' in style:
+                    lines.append(f"\n### {para.text}")
+                elif 'list' in style:
+                    lines.append(f"- {para.text}")
+                else:
+                    lines.append(para.text)
+            return '\n'.join(lines)
+
+        elif ext in ['xlsx', 'xls']:
+            import openpyxl
+            wb = openpyxl.load_workbook(filepath)
+            lines = []
+            for sheet_name in wb.sheetnames:
+                ws = wb[sheet_name]
+                lines.append(f"\n## Sheet: {sheet_name}\n")
+                rows = list(ws.iter_rows(values_only=True))
+                if not rows:
+                    continue
+                # First row as header
+                headers = [str(c) if c is not None else '' for c in rows[0]]
+                lines.append('| ' + ' | '.join(headers) + ' |')
+                lines.append('| ' + ' | '.join(['---'] * len(headers)) + ' |')
+                for row in rows[1:]:
+                    cells = [str(c) if c is not None else '' for c in row]
+                    lines.append('| ' + ' | '.join(cells) + ' |')
+            return '\n'.join(lines)
+
+        elif ext == 'pptx':
+            from pptx import Presentation
+            prs = Presentation(filepath)
+            lines = []
+            for i, slide in enumerate(prs.slides):
+                lines.append(f"\n## Slide {i + 1}\n")
+                for shape in slide.shapes:
+                    if hasattr(shape, 'text') and shape.text.strip():
+                        if shape.shape_type == 13:
+                            continue
+                        text = shape.text.strip()
+                        lines.append(f"- {text}")
+            return '\n'.join(lines)
+
+        elif ext in ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'tiff']:
+            return f'[Image file: {filename}]'
+
+        elif ext in ['mp3', 'wav', 'mp4']:
+            return f'[Media file: {filename}]'
+
+        else:
+            return f'[Unsupported file type: {filename}]'
+
+    except Exception as e:
+        return f'[Could not extract text: {str(e)}]'
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
@@ -37,6 +149,21 @@ class Message(db.Model):
     role = db.Column(db.String(10), nullable=False)
     content = db.Column(db.Text, nullable=False)
     conversation_id = db.Column(db.Integer, db.ForeignKey('conversation.id'), nullable=False)
+
+class KnowledgeBase(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    parent_id = db.Column(db.Integer, db.ForeignKey('knowledge_base.id'), nullable=True)
+    children = db.relationship('KnowledgeBase', backref=db.backref('parent', remote_side='KnowledgeBase.id'), lazy=True, cascade='all, delete-orphan')
+    files = db.relationship('KBFile', backref='knowledge_base', lazy=True, cascade='all, delete-orphan')
+
+class KBFile(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    filename = db.Column(db.String(300), nullable=False)
+    filepath = db.Column(db.String(500), nullable=False)
+    content = db.Column(db.Text, nullable=True)
+    kb_id = db.Column(db.Integer, db.ForeignKey('knowledge_base.id'), nullable=False)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -90,10 +217,12 @@ def dashboard(conversation_id=None):
         active_conversation = conversations[-1]
     if active_conversation:
         messages = Message.query.filter_by(conversation_id=active_conversation.id).all()
+    kbs = KnowledgeBase.query.filter_by(user_id=current_user.id).all()
     return render_template('dashboard.html',
         conversations=conversations,
         active_conversation=active_conversation,
-        messages=messages)
+        messages=messages,
+        kbs=kbs)
 
 @app.route('/conversation/new')
 @login_required
@@ -181,6 +310,91 @@ def chat():
 def logout():
     logout_user()
     return redirect(url_for('login'))
+
+@app.route('/kb')
+@login_required
+def kb_manager():
+    return redirect(url_for('dashboard') + '?mode=kb')
+
+@app.route('/kb/new', methods=['POST'])
+@login_required
+def kb_new():
+    name = request.form.get('name', '').strip()
+    parent_id = request.form.get('parent_id', None)
+    if parent_id:
+        parent_id = int(parent_id)
+    if name:
+        kb = KnowledgeBase(name=name, user_id=current_user.id, parent_id=parent_id)
+        db.session.add(kb)
+        db.session.commit()
+        os.makedirs(f'uploads/user_{current_user.id}/kb_{kb.id}', exist_ok=True)
+    if parent_id:
+        return redirect(url_for('kb_detail', kb_id=parent_id))
+    return redirect(url_for('dashboard') + '?mode=kb')
+
+@app.route('/kb/<int:kb_id>')
+@login_required
+def kb_detail(kb_id):
+    kb = KnowledgeBase.query.get(kb_id)
+    if not kb or kb.user_id != current_user.id:
+        return redirect(url_for('dashboard'))
+    breadcrumb = []
+    parent = kb.parent
+    while parent:
+        breadcrumb.insert(0, parent)
+        parent = parent.parent
+    return render_template('kb_detail.html', kb=kb, breadcrumb=breadcrumb)
+
+@app.route('/kb/<int:kb_id>/delete')
+@login_required
+def kb_delete(kb_id):
+    kb = KnowledgeBase.query.get(kb_id)
+    if kb and kb.user_id == current_user.id:
+        db.session.delete(kb)
+        db.session.commit()
+    return redirect(url_for('dashboard') + '?mode=kb')
+
+@app.route('/kb/<int:kb_id>/rename', methods=['POST'])
+@login_required
+def kb_rename(kb_id):
+    kb = KnowledgeBase.query.get(kb_id)
+    if kb and kb.user_id == current_user.id:
+        new_name = request.form.get('name', '').strip()
+        if new_name:
+            kb.name = new_name
+            db.session.commit()
+    return redirect(url_for('kb_detail', kb_id=kb_id))
+
+@app.route('/kb/<int:kb_id>/upload', methods=['POST'])
+@login_required
+def kb_upload(kb_id):
+    from werkzeug.utils import secure_filename
+    kb = KnowledgeBase.query.get(kb_id)
+    if not kb or kb.user_id != current_user.id:
+        return redirect(url_for('dashboard') + '?mode=kb')
+    file = request.files.get('file')
+    if file and file.filename:
+        filename = secure_filename(file.filename)
+        folder = f'uploads/user_{current_user.id}/kb_{kb_id}'
+        os.makedirs(folder, exist_ok=True)
+        filepath = os.path.join(folder, filename)
+        file.save(filepath)
+        content = extract_text(filepath, filename)
+        kb_file = KBFile(filename=filename, filepath=filepath, content=content, kb_id=kb_id)
+        db.session.add(kb_file)
+        db.session.commit()
+    return redirect(url_for('kb_detail', kb_id=kb_id))
+
+@app.route('/kb/<int:kb_id>/file/<int:file_id>/delete')
+@login_required
+def kb_file_delete(kb_id, file_id):
+    f = KBFile.query.get(file_id)
+    if f and f.kb_id == kb_id:
+        if os.path.exists(f.filepath):
+            os.remove(f.filepath)
+        db.session.delete(f)
+        db.session.commit()
+    return redirect(url_for('kb_detail', kb_id=f.kb_id))
 
 if __name__ == '__main__':
     with app.app_context():

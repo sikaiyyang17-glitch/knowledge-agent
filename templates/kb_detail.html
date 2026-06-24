@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ kb.name }} — Knowledge Agent</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; display: flex; height: 100vh; overflow: hidden; background: #fff; }
+
+        #sidebar {
+            width: 260px;
+            background: #f4f4f4;
+            border-right: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            flex-shrink: 0;
+            padding: 16px;
+        }
+        #sidebar h2 { font-size: 16px; margin-bottom: 16px; }
+        .nav-btn {
+            display: block;
+            padding: 10px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 8px;
+            text-align: center;
+            border: none;
+            cursor: pointer;
+        }
+        .nav-btn.primary { background: #000; color: white; }
+        .nav-btn.secondary { background: white; color: black; border: 1px solid #ddd; }
+        .nav-btn:hover { opacity: 0.85; }
+        .sidebar-section { margin-top: 16px; }
+        .sidebar-section h3 { font-size: 11px; color: #999; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
+        .sidebar-item {
+            display: block;
+            padding: 7px 10px;
+            border-radius: 6px;
+            text-decoration: none;
+            color: black;
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+        .sidebar-item:hover { background: #e0e0e0; }
+        #sidebar-footer { border-top: 1px solid #ddd; padding-top: 12px; margin-top: auto; }
+        #sidebar-footer a { font-size: 13px; color: #666; text-decoration: none; }
+        #sidebar-footer a:hover { color: black; }
+
+        #main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+        #kb-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid #ddd;
+            flex-shrink: 0;
+        }
+        .breadcrumb { font-size: 13px; color: #999; margin-bottom: 6px; }
+        .breadcrumb a { color: #666; text-decoration: none; }
+        .breadcrumb a:hover { color: black; }
+        .breadcrumb span { margin: 0 6px; }
+        #kb-header h1 { font-size: 22px; font-weight: bold; }
+        .kb-header-actions { display: flex; gap: 8px; margin-top: 12px; }
+        .action-btn {
+            padding: 7px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            background: white;
+        }
+        .action-btn:hover { background: #f0f0f0; }
+        .action-btn.danger { color: red; border-color: #ffcccc; }
+        .action-btn.danger:hover { background: #fff0f0; }
+
+        #rename-form {
+            display: none;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        #rename-form input {
+            flex: 1;
+            padding: 7px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+        }
+        #rename-form button {
+            padding: 7px 14px;
+            background: #000;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        #rename-form .cancel {
+            background: white;
+            color: #666;
+            border: 1px solid #ddd;
+        }
+
+        #kb-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+        }
+        .section-title {
+            font-size: 12px;
+            font-weight: bold;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            margin-top: 24px;
+        }
+        .section-title:first-child { margin-top: 0; }
+
+        /* Drop zone */
+        #drop-zone {
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            color: #aaa;
+            font-size: 14px;
+            margin-bottom: 8px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        #drop-zone.dragover { border-color: #000; background: #f9f9f9; color: #000; }
+        #drop-zone p { margin-bottom: 6px; }
+        #drop-zone .hint { font-size: 12px; color: #bbb; }
+        #upload-status {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 16px;
+            min-height: 20px;
+        }
+
+        /* Files */
+        .file-list { list-style: none; margin-bottom: 8px; }
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            font-size: 14px;
+            background: #fafafa;
+        }
+        .file-item:hover { background: #f0f0f0; }
+        .file-name { display: flex; align-items: center; gap: 8px; }
+        .file-delete {
+            background: none;
+            border: none;
+            color: #ccc;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        .file-delete:hover { color: red; }
+        .no-files { color: #bbb; font-size: 14px; font-style: italic; margin-bottom: 8px; }
+
+        /* Sub KB grid */
+        .sub-kb-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        .sub-kb-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 14px;
+            text-decoration: none;
+            color: black;
+            display: block;
+            transition: box-shadow 0.2s;
+        }
+        .sub-kb-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .sub-kb-name { font-size: 14px; font-weight: bold; margin-bottom: 4px; }
+        .sub-kb-meta { font-size: 12px; color: #999; }
+
+        /* Add sub KB */
+        .add-sub-form { display: flex; gap: 8px; margin-top: 12px; }
+        .add-sub-form input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+        }
+        .add-sub-form button {
+            padding: 8px 16px;
+            background: #000;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div id="sidebar">
+    <h2>Knowledge Agent</h2>
+    <a class="nav-btn secondary" href="/dashboard">💬 Chat</a>
+    <a class="nav-btn primary" href="/dashboard#kb" onclick="sessionStorage.setItem('mode','kb')">📚 Knowledge</a>
+
+    {% if kb.parent %}
+    <div class="sidebar-section">
+        <h3>Parent</h3>
+        <a class="sidebar-item" href="/kb/{{ kb.parent.id }}">📚 {{ kb.parent.name }}</a>
+    </div>
+    {% endif %}
+
+    {% if kb.children %}
+    <div class="sidebar-section">
+        <h3>Sub Knowledge Bases</h3>
+        {% for child in kb.children %}
+        <a class="sidebar-item" href="/kb/{{ child.id }}">📁 {{ child.name }}</a>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div id="sidebar-footer">
+        <a href="/logout">Logout</a>
+    </div>
+</div>
+
+<div id="main">
+    <div id="kb-header">
+        <div class="breadcrumb">
+            <a href="/dashboard" onclick="sessionStorage.setItem('mode','kb')">Knowledge Bases</a>
+            {% for crumb in breadcrumb %}
+            <span>›</span>
+            <a href="/kb/{{ crumb.id }}">{{ crumb.name }}</a>
+            {% endfor %}
+            <span>›</span>
+            <strong>{{ kb.name }}</strong>
+        </div>
+        <h1>📚 {{ kb.name }}</h1>
+        <div class="kb-header-actions">
+            <button class="action-btn" onclick="toggleRename()">✏️ Rename</button>
+            <button class="action-btn danger" onclick="deleteKB()">🗑 Delete</button>
+        </div>
+        <form id="rename-form" action="/kb/{{ kb.id }}/rename" method="POST">
+            <input type="text" name="name" value="{{ kb.name }}" placeholder="New name...">
+            <button type="submit">Save</button>
+            <button type="button" class="cancel" onclick="toggleRename()">Cancel</button>
+        </form>
+    </div>
+
+    <div id="kb-content">
+
+        <div class="section-title">Upload Files</div>
+        <div id="drop-zone" onclick="document.getElementById('file-input').click()">
+            <p>📎 Drag & drop files here, or click to select</p>
+            <p class="hint">Supports PDF, Word, Excel, PowerPoint, images, text, CSV, JSON and more</p>
+        </div>
+        <input type="file" id="file-input" multiple
+               accept=".txt,.md,.pdf,.docx,.doc,.xlsx,.xls,.csv,.json,.xml,.pptx,.ppt,.png,.jpg,.jpeg,.gif,.webp,.bmp,.tiff,.mp3,.mp4,.wav,.zip,.html,.htm"
+               style="display:none">
+        <div id="upload-status"></div>
+
+        <div class="section-title">Files ({{ kb.files|length }})</div>
+        {% if kb.files %}
+        <ul class="file-list">
+            {% for file in kb.files %}
+            <li class="file-item">
+                <div class="file-name">
+                    <span>📄</span>
+                    <span>{{ file.filename }}</span>
+                </div>
+                <button class="file-delete" onclick="deleteFile({{ kb.id }}, {{ file.id }}, '{{ file.filename }}')">×</button>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="no-files">No files yet — drag & drop or click above to upload.</p>
+        {% endif %}
+
+        <div class="section-title">Sub Knowledge Bases ({{ kb.children|length }})</div>
+        {% if kb.children %}
+        <div class="sub-kb-grid">
+            {% for child in kb.children %}
+            <a class="sub-kb-card" href="/kb/{{ child.id }}">
+                <div class="sub-kb-name">📁 {{ child.name }}</div>
+                <div class="sub-kb-meta">{{ child.files|length }} file(s)</div>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="no-files">No sub knowledge bases yet.</p>
+        {% endif %}
+
+        <div class="section-title">Add Sub Knowledge Base</div>
+        <form class="add-sub-form" action="/kb/new" method="POST">
+            <input type="hidden" name="parent_id" value="{{ kb.id }}">
+            <input type="text" name="name" placeholder="Sub knowledge base name..." required>
+            <button type="submit">+ Add</button>
+        </form>
+
+    </div>
+</div>
+
+<script>
+    function toggleRename() {
+        const form = document.getElementById('rename-form');
+        form.style.display = form.style.display === 'none' ? 'flex' : 'none';
+    }
+
+    function deleteKB() {
+        if (confirm('Delete "{{ kb.name }}" and everything inside it?')) {
+            window.location.href = '/kb/{{ kb.id }}/delete';
+        }
+    }
+
+    function deleteFile(kbId, fileId, filename) {
+        if (confirm('Delete "' + filename + '"?')) {
+            window.location.href = '/kb/' + kbId + '/file/' + fileId + '/delete';
+        }
+    }
+
+    // Drag and drop
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const uploadStatus = document.getElementById('upload-status');
+
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+    });
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('dragover');
+    });
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        uploadFiles(e.dataTransfer.files);
+    });
+    fileInput.addEventListener('change', () => {
+        uploadFiles(fileInput.files);
+    });
+
+    async function uploadFiles(files) {
+        if (!files.length) return;
+        uploadStatus.textContent = `Uploading ${files.length} file(s)...`;
+        let uploaded = 0;
+        for (const file of files) {
+            const formData = new FormData();
+            formData.append('file', file);
+            await fetch('/kb/{{ kb.id }}/upload', {
+                method: 'POST',
+                body: formData
+            });
+            uploaded++;
+            uploadStatus.textContent = `Uploaded ${uploaded} of ${files.length} file(s)...`;
+        }
+        uploadStatus.textContent = `✅ All ${files.length} file(s) uploaded!`;
+        setTimeout(() => window.location.reload(), 800);
+    }
+</script>
+
+</body>
+</html>

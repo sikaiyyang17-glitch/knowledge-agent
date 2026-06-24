@@ -4,7 +4,7 @@
     <title>Knowledge Agent</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; display: flex; height: 100vh; overflow: hidden; }
+        body { font-family: Arial, sans-serif; display: flex; height: 100vh; overflow: hidden; background: #fff; }
 
         #sidebar {
             width: 260px;
@@ -12,48 +12,114 @@
             border-right: 1px solid #ddd;
             display: flex;
             flex-direction: column;
-            padding: 16px;
             height: 100vh;
+            flex-shrink: 0;
         }
-        #sidebar h2 { font-size: 16px; margin-bottom: 12px; }
-        #new-chat-btn {
+        #mode-tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+        }
+        .mode-tab {
+            flex: 1;
+            padding: 14px 0;
+            text-align: center;
+            font-size: 13px;
+            cursor: pointer;
+            border: none;
+            background: #f4f4f4;
+            color: #666;
+            font-weight: normal;
+            border-bottom: 2px solid transparent;
+        }
+        .mode-tab.active {
+            color: #000;
+            font-weight: bold;
+            border-bottom: 2px solid #000;
+            background: #f4f4f4;
+        }
+        .mode-tab:hover { background: #eee; }
+        #sidebar-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 12px;
+        }
+        #action-btn {
+            width: 100%;
             background: #000;
             color: white;
             border: none;
             padding: 10px;
             border-radius: 6px;
             cursor: pointer;
-            margin-bottom: 12px;
             font-size: 14px;
-            width: 100%;
+            margin-bottom: 12px;
         }
-        #new-chat-btn:hover { background: #333; }
-        #conversation-list { flex: 1; overflow-y: auto; }
-        .conv-item {
+        #action-btn:hover { background: #333; }
+        #item-list { flex: 1; overflow-y: auto; }
+        .list-item {
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
             padding: 8px 10px;
             border-radius: 6px;
             margin-bottom: 4px;
             font-size: 14px;
+            cursor: pointer;
         }
-        .conv-item:hover { background: #e0e0e0; }
-        .conv-item.active { background: #ddd; font-weight: bold; }
-        .conv-link { text-decoration: none; color: black; flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-        .delete-btn {
+        .list-item:hover { background: #e0e0e0; }
+        .list-item.active { background: #ddd; font-weight: bold; }
+        .list-item a {
+            text-decoration: none;
+            color: black;
+            flex: 1;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+        .item-delete {
             background: none;
             border: none;
             color: #999;
             cursor: pointer;
-            font-size: 18px;
+            font-size: 16px;
             padding: 0 4px;
-            line-height: 1;
             flex-shrink: 0;
         }
-        .delete-btn:hover { color: red; }
-        #sidebar-footer { border-top: 1px solid #ddd; padding-top: 12px; margin-top: 12px; }
-        #sidebar-footer a { font-size: 13px; color: #666; text-decoration: none; }
+        .item-delete:hover { color: red; }
+        #model-area {
+            border-top: 1px solid #ddd;
+            padding-top: 12px;
+            margin-top: 8px;
+        }
+        #model-area label {
+            font-size: 11px;
+            color: #999;
+            display: block;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        #model-selector {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            outline: none;
+            background: white;
+        }
+        #sidebar-footer {
+            border-top: 1px solid #ddd;
+            padding: 12px;
+        }
+        #sidebar-footer a {
+            font-size: 13px;
+            color: #666;
+            text-decoration: none;
+        }
         #sidebar-footer a:hover { color: black; }
 
         #main {
@@ -63,26 +129,20 @@
             height: 100vh;
             overflow: hidden;
         }
+
+        /* Chat view */
+        #chat-view {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
         #chat-header {
             padding: 16px 20px;
             border-bottom: 1px solid #ddd;
             font-size: 18px;
             font-weight: bold;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             flex-shrink: 0;
         }
-        #mode-toggle { display: flex; gap: 8px; }
-        .mode-btn {
-            padding: 6px 14px;
-            border: 1px solid #ddd;
-            border-radius: 20px;
-            background: white;
-            cursor: pointer;
-            font-size: 13px;
-        }
-        .mode-btn.active { background: #000; color: white; border-color: #000; }
         #messages {
             flex: 1;
             overflow-y: auto;
@@ -96,8 +156,7 @@
             padding: 10px 14px;
             border-radius: 10px;
             font-size: 14px;
-            line-height: 1.5;
-            white-space: pre-wrap;
+            line-height: 1.6;
         }
         .message.user { background: #000; color: white; align-self: flex-end; }
         .message.agent { background: #f0f0f0; color: black; align-self: flex-start; }
@@ -127,50 +186,76 @@
             font-size: 14px;
         }
         #send-btn:hover { background: #333; }
-        #empty-state {
+        #empty-chat {
             color: #aaa;
             font-size: 15px;
             text-align: center;
-            margin-top: 40px;
+            margin-top: 60px;
         }
-        #header-controls { display: flex; align-items: center; gap: 12px; }
-        #model-selector {
-            padding: 6px 12px;
+
+        /* KB view */
+        #kb-view {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            overflow-y: auto;
+            padding: 30px;
+        }
+        #kb-view h1 { font-size: 22px; margin-bottom: 6px; }
+        #kb-view .subtitle { color: #666; font-size: 14px; margin-bottom: 24px; }
+
+        .kb-card {
             border: 1px solid #ddd;
-            border-radius: 20px;
-            font-size: 13px;
-            cursor: pointer;
-            outline: none;
-            background: white;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            overflow: hidden;
+            text-decoration: none;
+            color: black;
+            display: block;
+            transition: box-shadow 0.2s;
         }
+        .kb-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .kb-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            background: #fafafa;
+        }
+        .kb-card-title { font-size: 15px; font-weight: bold; }
+        .kb-card-meta { font-size: 12px; color: #999; }
     </style>
 </head>
 <body>
 
 <div id="sidebar">
-    <h2>Knowledge Agent</h2>
-    <button id="new-chat-btn" onclick="window.location.href='/conversation/new'">+ New Chat</button>
-    <div id="conversation-list">
-        {% for conv in conversations %}
-        <div class="conv-item {% if active_conversation and conv.id == active_conversation.id %}active{% endif %}">
-            <a class="conv-link" href="/dashboard/{{ conv.id }}">{{ conv.title }}</a>
-            <button class="delete-btn" onclick="event.preventDefault(); deleteConv({{ conv.id }})">×</button>
-        </div>
-        {% endfor %}
+    <div id="mode-tabs">
+        <button class="mode-tab active" id="tab-chat" onclick="switchMode('chat')">💬 Chat</button>
+        <button class="mode-tab" id="tab-kb" onclick="switchMode('kb')">📚 Knowledge</button>
     </div>
-    <div id="sidebar-footer">
-        <a href="/logout">Logout</a>
-    </div>
-</div>
-
-<div id="main">
-    <div id="chat-header">
-        <span>{% if active_conversation %}{{ active_conversation.title }}{% else %}Knowledge Agent{% endif %}</span>
-        <div id="header-controls">
-            <div id="mode-toggle">
-                <button id="btn-chat" class="mode-btn active" onclick="setMode('chat')">💬 Chat</button>
-                <button id="btn-knowledge" class="mode-btn" onclick="setMode('knowledge')">📚 Knowledge</button>
+    <div id="sidebar-content">
+        <button id="action-btn" onclick="handleAction()">+ New Chat</button>
+        <div id="item-list">
+            <div id="chat-list">
+                {% for conv in conversations %}
+                <div class="list-item {% if active_conversation and conv.id == active_conversation.id %}active{% endif %}">
+                    <a href="/dashboard/{{ conv.id }}">{{ conv.title }}</a>
+                    <button class="item-delete" onclick="event.preventDefault(); deleteConv({{ conv.id }})">×</button>
+                </div>
+                {% endfor %}
             </div>
+            <div id="kb-list" style="display:none">
+                {% for kb in kbs %}
+                {% if not kb.parent_id %}
+                <div class="list-item">
+                    <a href="/kb/{{ kb.id }}">📚 {{ kb.name }}</a>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        <div id="model-area">
+            <label>AI Model</label>
             <select id="model-selector">
                 <option value="gemini">🌐 Google Gemini</option>
                 <option value="groq">⚡ Groq Llama</option>
@@ -178,20 +263,61 @@
             </select>
         </div>
     </div>
-    <div id="messages">
-        {% if not active_conversation %}
-        <p id="empty-state">Click "+ New Chat" to start a conversation</p>
-        {% else %}
-            {% for msg in messages %}
-            <div class="message {{ msg.role }}">{{ msg.content }}</div>
-            {% endfor %}
-        {% endif %}
+    <div id="sidebar-footer">
+        <a href="/logout">Logout</a>
     </div>
-    <div id="input-area">
-        <input type="text" id="message-input" placeholder="Type your message..."
-               {% if not active_conversation %}disabled{% endif %}>
-        <button id="send-btn" onclick="sendMessage()"
-                {% if not active_conversation %}disabled{% endif %}>Send</button>
+</div>
+
+<div id="main">
+    <div id="chat-view">
+        <div id="chat-header">
+            {% if active_conversation %}{{ active_conversation.title }}{% else %}Knowledge Agent{% endif %}
+        </div>
+        <div id="messages">
+            {% if not active_conversation %}
+            <p id="empty-chat">Click "+ New Chat" to start a conversation</p>
+            {% else %}
+                {% for msg in messages %}
+                <div class="message {{ msg.role }}">{{ msg.content }}</div>
+                {% endfor %}
+            {% endif %}
+        </div>
+        <div id="input-area">
+            <input type="text" id="message-input" placeholder="Type your message..."
+                   {% if not active_conversation %}disabled{% endif %}>
+            <button id="send-btn" onclick="sendMessage()"
+                    {% if not active_conversation %}disabled{% endif %}>Send</button>
+        </div>
+    </div>
+
+    <div id="kb-view">
+        <h1>📚 Knowledge Bases</h1>
+        <p class="subtitle">Click a knowledge base to open it, or create a new one below.</p>
+
+        <form action="/kb/new" method="POST" style="display:flex; gap:10px; margin-bottom:24px;">
+            <input type="text" name="name" placeholder="New knowledge base name..."
+                   style="flex:1; padding:10px 14px; border:1px solid #ddd; border-radius:8px; font-size:14px; outline:none;" required>
+            <input type="hidden" name="parent_id" value="">
+            <button type="submit"
+                    style="background:#000; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-size:14px;">
+                + Create
+            </button>
+        </form>
+
+        {% if kbs %}
+            {% for kb in kbs %}
+            {% if not kb.parent_id %}
+            <a class="kb-card" href="/kb/{{ kb.id }}">
+                <div class="kb-card-header">
+                    <span class="kb-card-title">📚 {{ kb.name }}</span>
+                    <span class="kb-card-meta">{{ kb.files|length }} file(s) · {{ kb.children|length }} sub-KB(s) →</span>
+                </div>
+            </a>
+            {% endif %}
+            {% endfor %}
+        {% else %}
+            <p style="color:#bbb; font-style:italic;">No knowledge bases yet. Create one above!</p>
+        {% endif %}
     </div>
 </div>
 
@@ -199,30 +325,57 @@
     const conversationId = {{ active_conversation.id if active_conversation else 'null' }};
     let currentMode = 'chat';
 
+    // Check if we should start in KB mode
+    window.addEventListener('DOMContentLoaded', function() {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('mode') === 'kb' || sessionStorage.getItem('mode') === 'kb') {
+            switchMode('kb');
+            sessionStorage.removeItem('mode');
+        }
+    });
+
+    function switchMode(mode) {
+        currentMode = mode;
+        document.getElementById('tab-chat').classList.toggle('active', mode === 'chat');
+        document.getElementById('tab-kb').classList.toggle('active', mode === 'kb');
+        document.getElementById('chat-list').style.display = mode === 'chat' ? 'block' : 'none';
+        document.getElementById('kb-list').style.display = mode === 'kb' ? 'block' : 'none';
+        document.getElementById('action-btn').textContent = mode === 'chat' ? '+ New Chat' : '+ New KB';
+        document.getElementById('model-area').style.display = mode === 'chat' ? 'block' : 'none';
+        document.getElementById('chat-view').style.display = mode === 'chat' ? 'flex' : 'none';
+        document.getElementById('kb-view').style.display = mode === 'kb' ? 'flex' : 'none';
+    }
+
+    function handleAction() {
+        if (currentMode === 'chat') {
+            window.location.href = '/conversation/new';
+        } else {
+            const input = document.querySelector('#kb-view input[name="name"]');
+            input.scrollIntoView({ behavior: 'smooth' });
+            input.focus();
+        }
+    }
+
     document.getElementById('message-input').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') sendMessage();
     });
-
-    function setMode(mode) {
-        currentMode = mode;
-        document.getElementById('btn-chat').classList.toggle('active', mode === 'chat');
-        document.getElementById('btn-knowledge').classList.toggle('active', mode === 'knowledge');
-    }
 
     function sendMessage() {
         const input = document.getElementById('message-input');
         const message = input.value.trim();
         if (!message || !conversationId) return;
-
         appendMessage('user', message);
         input.value = '';
         input.disabled = true;
         document.getElementById('send-btn').disabled = true;
-
         fetch('/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: message, conversation_id: conversationId, model: document.getElementById('model-selector').value })
+            body: JSON.stringify({
+                message: message,
+                conversation_id: conversationId,
+                model: document.getElementById('model-selector').value
+            })
         })
         .then(res => res.json())
         .then(data => {
@@ -230,15 +383,12 @@
                 appendMessage('agent', data.response);
             } else {
                 const modelName = document.getElementById('model-selector').options[document.getElementById('model-selector').selectedIndex].text;
-                appendMessage('agent', `⚠️ ${modelName} is currently unavailable. Please try the following:\n\n• Check your internet connection\n• Switch to a different model using the selector above\n• If using Ollama, make sure the Ollama app is running\n• Try again in a few moments`);
+                appendMessage('agent', `⚠️ ${modelName} is currently unavailable.\n\n• Check your internet connection\n• Switch to a different model\n• If using Ollama, make sure it is running`);
             }
         })
         .catch(() => {
             const modelName = document.getElementById('model-selector').options[document.getElementById('model-selector').selectedIndex].text;
-            appendMessage('agent', `⚠️ ${modelName} is currently unavailable. Please try the following:\n\n• Check your internet connection\n• Switch to a different model using the selector above\n• If using Ollama, make sure the Ollama app is running\n• Try again in a few moments`);
-        })
-        .catch(() => {
-            appendMessage('agent', 'Connection error. Please try again.');
+            appendMessage('agent', `⚠️ ${modelName} is currently unavailable.\n\n• Check your internet connection\n• Switch to a different model\n• If using Ollama, make sure it is running`);
         })
         .finally(() => {
             input.disabled = false;
