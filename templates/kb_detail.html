@@ -5,208 +5,79 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; display: flex; height: 100vh; overflow: hidden; background: #fff; }
-
-        #sidebar {
-            width: 260px;
-            background: #f4f4f4;
-            border-right: 1px solid #ddd;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            flex-shrink: 0;
-            padding: 16px;
-        }
+        #sidebar { width: 260px; background: #f4f4f4; border-right: 1px solid #ddd; display: flex; flex-direction: column; height: 100vh; flex-shrink: 0; padding: 16px; }
         #sidebar h2 { font-size: 16px; margin-bottom: 16px; }
-        .nav-btn {
-            display: block;
-            padding: 10px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-size: 14px;
-            margin-bottom: 8px;
-            text-align: center;
-            border: none;
-            cursor: pointer;
-        }
+        .nav-btn { display: block; padding: 10px; border-radius: 6px; text-decoration: none; font-size: 14px; margin-bottom: 8px; text-align: center; border: none; cursor: pointer; }
         .nav-btn.primary { background: #000; color: white; }
         .nav-btn.secondary { background: white; color: black; border: 1px solid #ddd; }
         .nav-btn:hover { opacity: 0.85; }
         .sidebar-section { margin-top: 16px; }
         .sidebar-section h3 { font-size: 11px; color: #999; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
-        .sidebar-item {
-            display: block;
-            padding: 7px 10px;
-            border-radius: 6px;
-            text-decoration: none;
-            color: black;
-            font-size: 13px;
-            margin-bottom: 4px;
-        }
+        .sidebar-item { display: block; padding: 7px 10px; border-radius: 6px; text-decoration: none; color: black; font-size: 13px; margin-bottom: 4px; }
         .sidebar-item:hover { background: #e0e0e0; }
         #sidebar-footer { border-top: 1px solid #ddd; padding-top: 12px; margin-top: auto; }
         #sidebar-footer a { font-size: 13px; color: #666; text-decoration: none; }
         #sidebar-footer a:hover { color: black; }
-
-        #main {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-        }
-        #kb-header {
-            padding: 16px 24px;
-            border-bottom: 1px solid #ddd;
-            flex-shrink: 0;
-        }
+        #main { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        #kb-header { padding: 16px 24px; border-bottom: 1px solid #ddd; flex-shrink: 0; }
         .breadcrumb { font-size: 13px; color: #999; margin-bottom: 6px; }
         .breadcrumb a { color: #666; text-decoration: none; }
         .breadcrumb a:hover { color: black; }
         .breadcrumb span { margin: 0 6px; }
         #kb-header h1 { font-size: 22px; font-weight: bold; }
         .kb-header-actions { display: flex; gap: 8px; margin-top: 12px; }
-        .action-btn {
-            padding: 7px 14px;
-            border-radius: 6px;
-            font-size: 13px;
-            cursor: pointer;
-            border: 1px solid #ddd;
-            background: white;
-        }
+        .action-btn { padding: 7px 14px; border-radius: 6px; font-size: 13px; cursor: pointer; border: 1px solid #ddd; background: white; }
         .action-btn:hover { background: #f0f0f0; }
         .action-btn.danger { color: red; border-color: #ffcccc; }
         .action-btn.danger:hover { background: #fff0f0; }
-
-        #rename-form {
-            display: none;
-            gap: 8px;
-            margin-top: 10px;
-        }
-        #rename-form input {
-            flex: 1;
-            padding: 7px 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 14px;
-            outline: none;
-        }
-        #rename-form button {
-            padding: 7px 14px;
-            background: #000;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 13px;
-            cursor: pointer;
-        }
-        #rename-form .cancel {
-            background: white;
-            color: #666;
-            border: 1px solid #ddd;
-        }
-
-        #kb-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 24px;
-        }
-        .section-title {
-            font-size: 12px;
-            font-weight: bold;
-            color: #666;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 12px;
-            margin-top: 24px;
-        }
+        #rename-form { display: none; gap: 8px; margin-top: 10px; }
+        #rename-form input { flex: 1; padding: 7px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; outline: none; }
+        #rename-form button { padding: 7px 14px; background: #000; color: white; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; }
+        #rename-form .cancel { background: white; color: #666; border: 1px solid #ddd; }
+        .meta-section { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+        .meta-block { padding: 10px 12px; background: #f9f9f9; border-radius: 8px; border: 1px solid #eee; }
+        .meta-block-label { font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+        .meta-block-text { font-size: 13px; color: #555; }
+        .meta-block-instructions { font-size: 13px; color: #666; padding: 8px; background: #fffbe6; border-radius: 6px; border-left: 3px solid #f0c040; }
+        .editor-area { display: none; margin-top: 8px; }
+        .editor-area textarea { width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; min-height: 60px; outline: none; resize: vertical; font-family: Arial, sans-serif; }
+        .editor-area textarea:focus { border-color: #000; }
+        .editor-buttons { display: flex; gap: 8px; margin-top: 8px; }
+        .editor-buttons button { padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; border: 1px solid #ddd; background: white; }
+        .editor-buttons button.save { background: #000; color: white; border: none; }
+        #kb-content { flex: 1; overflow-y: auto; padding: 24px; }
+        .section-title { font-size: 12px; font-weight: bold; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; margin-top: 24px; }
         .section-title:first-child { margin-top: 0; }
-
-        /* Drop zone */
-        #drop-zone {
-            border: 2px dashed #ddd;
-            border-radius: 10px;
-            padding: 30px;
-            text-align: center;
-            color: #aaa;
-            font-size: 14px;
-            margin-bottom: 8px;
-            transition: all 0.2s;
-            cursor: pointer;
-        }
+        #drop-zone { border: 2px dashed #ddd; border-radius: 10px; padding: 30px; text-align: center; color: #aaa; font-size: 14px; margin-bottom: 8px; transition: all 0.2s; cursor: pointer; }
         #drop-zone.dragover { border-color: #000; background: #f9f9f9; color: #000; }
         #drop-zone p { margin-bottom: 6px; }
         #drop-zone .hint { font-size: 12px; color: #bbb; }
-        #upload-status {
-            font-size: 13px;
-            color: #666;
-            margin-bottom: 16px;
-            min-height: 20px;
-        }
-
-        /* Files */
+        #upload-status { font-size: 13px; color: #666; margin-bottom: 16px; min-height: 20px; }
+        .files-toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+        .select-all-label { font-size: 13px; cursor: pointer; color: #444; }
+        #export-selected-btn { padding: 7px 14px; background: #000; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; }
+        #export-selected-btn:hover { background: #333; }
+        #search-box { padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; margin-bottom: 12px; width: 100%; outline: none; }
+        #search-box:focus { border-color: #000; }
         .file-list { list-style: none; margin-bottom: 8px; }
-        .file-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 14px;
-            border: 1px solid #eee;
-            border-radius: 8px;
-            margin-bottom: 6px;
-            font-size: 14px;
-            background: #fafafa;
-        }
+        .file-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border: 1px solid #eee; border-radius: 8px; margin-bottom: 6px; font-size: 14px; background: #fafafa; }
         .file-item:hover { background: #f0f0f0; }
+        .file-item.hidden { display: none; }
         .file-name { display: flex; align-items: center; gap: 8px; }
-        .file-delete {
-            background: none;
-            border: none;
-            color: #ccc;
-            cursor: pointer;
-            font-size: 18px;
-        }
-        .file-delete:hover { color: red; }
+        .file-size { font-size: 11px; color: #bbb; }
+        .file-actions { display: flex; gap: 6px; align-items: center; }
+        .file-action-btn { background: none; border: none; font-size: 15px; cursor: pointer; padding: 4px 6px; color: #aaa; border-radius: 4px; }
+        .file-action-btn:hover { color: #000; background: #eee; }
+        .file-checkbox { cursor: pointer; width: 16px; height: 16px; }
         .no-files { color: #bbb; font-size: 14px; font-style: italic; margin-bottom: 8px; }
-
-        /* Sub KB grid */
-        .sub-kb-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 12px;
-            margin-bottom: 8px;
-        }
-        .sub-kb-card {
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 14px;
-            text-decoration: none;
-            color: black;
-            display: block;
-            transition: box-shadow 0.2s;
-        }
+        .sub-kb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-bottom: 8px; }
+        .sub-kb-card { border: 1px solid #ddd; border-radius: 8px; padding: 14px; text-decoration: none; color: black; display: block; transition: box-shadow 0.2s; }
         .sub-kb-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
         .sub-kb-name { font-size: 14px; font-weight: bold; margin-bottom: 4px; }
         .sub-kb-meta { font-size: 12px; color: #999; }
-
-        /* Add sub KB */
         .add-sub-form { display: flex; gap: 8px; margin-top: 12px; }
-        .add-sub-form input {
-            flex: 1;
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 14px;
-            outline: none;
-        }
-        .add-sub-form button {
-            padding: 8px 16px;
-            background: #000;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 13px;
-            cursor: pointer;
-        }
+        .add-sub-form input { flex: 1; padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; outline: none; }
+        .add-sub-form button { padding: 8px 16px; background: #000; color: white; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -214,33 +85,28 @@
 <div id="sidebar">
     <h2>Knowledge Agent</h2>
     <a class="nav-btn secondary" href="/dashboard">💬 Chat</a>
-    <a class="nav-btn primary" href="/dashboard#kb" onclick="sessionStorage.setItem('mode','kb')">📚 Knowledge</a>
-
+    <a class="nav-btn primary" href="/dashboard" onclick="sessionStorage.setItem('mode','kb')">🌊 Knowledge</a>
     {% if kb.parent %}
     <div class="sidebar-section">
-        <h3>Parent</h3>
-        <a class="sidebar-item" href="/kb/{{ kb.parent.id }}">📚 {{ kb.parent.name }}</a>
+        <h3>Parent Lake</h3>
+        <a class="sidebar-item" href="/kb/{{ kb.parent.id }}">🌊 {{ kb.parent.name }}</a>
     </div>
     {% endif %}
-
     {% if kb.children %}
     <div class="sidebar-section">
-        <h3>Sub Knowledge Bases</h3>
+        <h3>Knowledge Pools</h3>
         {% for child in kb.children %}
-        <a class="sidebar-item" href="/kb/{{ child.id }}">📁 {{ child.name }}</a>
+        <a class="sidebar-item" href="/kb/{{ child.id }}">💧 {{ child.name }}</a>
         {% endfor %}
     </div>
     {% endif %}
-
-    <div id="sidebar-footer">
-        <a href="/logout">Logout</a>
-    </div>
+    <div id="sidebar-footer"><a href="/logout">Logout</a></div>
 </div>
 
 <div id="main">
     <div id="kb-header">
         <div class="breadcrumb">
-            <a href="/dashboard" onclick="sessionStorage.setItem('mode','kb')">Knowledge Bases</a>
+            <a href="/dashboard" onclick="sessionStorage.setItem('mode','kb')">Knowledge Lakes</a>
             {% for crumb in breadcrumb %}
             <span>›</span>
             <a href="/kb/{{ crumb.id }}">{{ crumb.name }}</a>
@@ -248,7 +114,7 @@
             <span>›</span>
             <strong>{{ kb.name }}</strong>
         </div>
-        <h1>📚 {{ kb.name }}</h1>
+        <h1>🌊 {{ kb.name }}</h1>
         <div class="kb-header-actions">
             <button class="action-btn" onclick="toggleRename()">✏️ Rename</button>
             <button class="action-btn danger" onclick="deleteKB()">🗑 Delete</button>
@@ -258,10 +124,41 @@
             <button type="submit">Save</button>
             <button type="button" class="cancel" onclick="toggleRename()">Cancel</button>
         </form>
+
+        <div class="meta-section">
+            <div class="meta-block">
+                <div class="meta-block-label">Description</div>
+                {% if kb.description %}<div class="meta-block-text">{{ kb.description }}</div>{% endif %}
+                <button class="action-btn" style="margin-top:6px;" onclick="toggleEditor('desc')">
+                    {% if kb.description %}Edit{% else %}Add Description{% endif %}
+                </button>
+                <div class="editor-area" id="editor-desc">
+                    <textarea id="input-desc" placeholder="Describe this knowledge lake...">{{ kb.description or '' }}</textarea>
+                    <div class="editor-buttons">
+                        <button class="save" onclick="saveField('desc', '/kb/{{ kb.id }}/description/save', 'description')">Save</button>
+                        <button onclick="toggleEditor('desc')">Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="meta-block">
+                <div class="meta-block-label">Instructions</div>
+                {% if kb.instructions %}<div class="meta-block-instructions">{{ kb.instructions }}</div>{% endif %}
+                <button class="action-btn" style="margin-top:6px;" onclick="toggleEditor('inst')">
+                    {% if kb.instructions %}Edit{% else %}Add Instructions{% endif %}
+                </button>
+                <div class="editor-area" id="editor-inst">
+                    <textarea id="input-inst" placeholder="Instructions for the AI agent when reading this lake...">{{ kb.instructions or '' }}</textarea>
+                    <div class="editor-buttons">
+                        <button class="save" onclick="saveField('inst', '/kb/{{ kb.id }}/instructions/save', 'instructions')">Save</button>
+                        <button onclick="toggleEditor('inst')">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div id="kb-content">
-
         <div class="section-title">Upload Files</div>
         <div id="drop-zone" onclick="document.getElementById('file-input').click()">
             <p>📎 Drag & drop files here, or click to select</p>
@@ -273,15 +170,35 @@
         <div id="upload-status"></div>
 
         <div class="section-title">Files ({{ kb.files|length }})</div>
+        <div class="files-toolbar">
+            <input type="checkbox" id="select-all" onclick="toggleSelectAll()">
+            <label class="select-all-label" for="select-all">Select All</label>
+            <button onclick="deleteSelected()" style="padding:7px 14px; background:white; color:red; border:1px solid #ffcccc; border-radius:6px; cursor:pointer; font-size:13px;">🗑️ Delete Selected</button>
+            <div style="display:flex; gap:8px; margin-left:auto;">
+                <button id="export-selected-btn" onclick="exportSelected()">📦 Export Selected</button>
+                <button onclick="document.getElementById('import-zip-input').click()" style="padding:7px 14px; background:white; color:#000; border:1px solid #ddd; border-radius:6px; cursor:pointer; font-size:13px;">📥 Import ZIP</button>
+                <form id="import-zip-form" action="/kb/{{ kb.id }}/import" method="POST" enctype="multipart/form-data" style="display:none;">
+                    <input type="file" id="import-zip-input" name="zip_file" accept=".zip" onchange="document.getElementById('import-zip-form').submit()">
+                </form>
+            </div>
+        </div>
+
+        <input type="text" id="search-box" placeholder="🔍 Search files by name or content..." onkeyup="filterFiles()">
+
         {% if kb.files %}
         <ul class="file-list">
             {% for file in kb.files %}
-            <li class="file-item">
+            <li class="file-item" data-filename="{{ file.filename }}" data-content="{{ file.content or '' }}">
                 <div class="file-name">
                     <span>📄</span>
                     <span>{{ file.filename }}</span>
+                    <span class="file-size">{{ file.filepath | filesize }}</span>
                 </div>
-                <button class="file-delete" onclick="deleteFile({{ kb.id }}, {{ file.id }}, '{{ file.filename }}')">×</button>
+                <div class="file-actions">
+                    <button class="file-action-btn" title="Rename" onclick="renameFile({{ file.id }}, '{{ file.filename }}')">✏️</button>
+                    <button class="file-action-btn" title="Delete" onclick="deleteFile({{ kb.id }}, {{ file.id }}, '{{ file.filename }}')">🗑️</button>
+                    <input type="checkbox" class="file-checkbox" data-file-id="{{ file.id }}">
+                </div>
             </li>
             {% endfor %}
         </ul>
@@ -289,27 +206,26 @@
         <p class="no-files">No files yet — drag & drop or click above to upload.</p>
         {% endif %}
 
-        <div class="section-title">Sub Knowledge Bases ({{ kb.children|length }})</div>
+        <div class="section-title">Knowledge Pools ({{ kb.children|length }})</div>
         {% if kb.children %}
         <div class="sub-kb-grid">
             {% for child in kb.children %}
             <a class="sub-kb-card" href="/kb/{{ child.id }}">
-                <div class="sub-kb-name">📁 {{ child.name }}</div>
+                <div class="sub-kb-name">💧 {{ child.name }}</div>
                 <div class="sub-kb-meta">{{ child.files|length }} file(s)</div>
             </a>
             {% endfor %}
         </div>
         {% else %}
-        <p class="no-files">No sub knowledge bases yet.</p>
+        <p class="no-files">No knowledge pools yet.</p>
         {% endif %}
 
-        <div class="section-title">Add Sub Knowledge Base</div>
+        <div class="section-title">Add Knowledge Pool</div>
         <form class="add-sub-form" action="/kb/new" method="POST">
             <input type="hidden" name="parent_id" value="{{ kb.id }}">
-            <input type="text" name="name" placeholder="Sub knowledge base name..." required>
+            <input type="text" name="name" placeholder="Knowledge pool name..." required>
             <button type="submit">+ Add</button>
         </form>
-
     </div>
 </div>
 
@@ -331,26 +247,107 @@
         }
     }
 
-    // Drag and drop
+    function renameFile(fileId, oldName) {
+        const newName = prompt('New file name:', oldName);
+        if (newName && newName !== oldName) {
+            const formData = new FormData();
+            formData.append('new_name', newName);
+            fetch('/kb/{{ kb.id }}/file/' + fileId + '/rename', { method: 'POST', body: formData })
+                .then(() => window.location.reload());
+        }
+    }
+
+    function toggleEditor(key) {
+        const editor = document.getElementById('editor-' + key);
+        editor.style.display = editor.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function saveField(key, url, fieldName) {
+        const value = document.getElementById('input-' + key).value;
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = url;
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = fieldName;
+        input.value = value;
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+    function toggleSelectAll() {
+        const selectAll = document.getElementById('select-all');
+        document.querySelectorAll('.file-checkbox').forEach(cb => { cb.checked = selectAll.checked; });
+    }
+
+    function exportSelected() {
+        const checked = document.querySelectorAll('.file-checkbox:checked');
+        const fileIds = Array.from(checked).map(cb => cb.dataset.fileId);
+        if (fileIds.length === 0) { alert('Please select at least one file to export.'); return; }
+        fetch('/kb/{{ kb.id }}/export/selected', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ file_ids: fileIds })
+        })
+        .then(res => res.blob())
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = '{{ kb.name }}_export.zip';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
+    }
+
+    function deleteSelected() {
+        const checked = document.querySelectorAll('.file-checkbox:checked');
+        const fileIds = Array.from(checked).map(cb => cb.dataset.fileId);
+        if (fileIds.length === 0) { alert('Please select at least one file to delete.'); return; }
+        if (!confirm(`Delete ${fileIds.length} file(s)? This cannot be undone.`)) return;
+        fetch('/kb/{{ kb.id }}/files/delete-selected', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ file_ids: fileIds })
+        })
+        .then(res => res.json())
+        .then(data => { if (data.success) window.location.reload(); });
+    }
+
+    function filterFiles() {
+        const query = document.getElementById('search-box').value.toLowerCase();
+        const items = document.querySelectorAll('.file-item');
+        let visible = 0;
+        items.forEach(item => {
+            const name = item.dataset.filename.toLowerCase();
+            const content = item.dataset.content.toLowerCase();
+            if (name.includes(query) || content.includes(query)) {
+                item.classList.remove('hidden'); visible++;
+            } else {
+                item.classList.add('hidden');
+            }
+        });
+        const existing = document.getElementById('no-search-results');
+        if (visible === 0 && items.length > 0) {
+            if (!existing) {
+                const p = document.createElement('p');
+                p.id = 'no-search-results';
+                p.className = 'no-files';
+                p.textContent = 'No matching files found.';
+                document.querySelector('.file-list').before(p);
+            }
+        } else if (existing) { existing.remove(); }
+    }
+
     const dropZone = document.getElementById('drop-zone');
     const fileInput = document.getElementById('file-input');
     const uploadStatus = document.getElementById('upload-status');
-
-    dropZone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dropZone.classList.add('dragover');
-    });
-    dropZone.addEventListener('dragleave', () => {
-        dropZone.classList.remove('dragover');
-    });
-    dropZone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropZone.classList.remove('dragover');
-        uploadFiles(e.dataTransfer.files);
-    });
-    fileInput.addEventListener('change', () => {
-        uploadFiles(fileInput.files);
-    });
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('dragover'); });
+    dropZone.addEventListener('drop', (e) => { e.preventDefault(); dropZone.classList.remove('dragover'); uploadFiles(e.dataTransfer.files); });
+    fileInput.addEventListener('change', () => { uploadFiles(fileInput.files); });
 
     async function uploadFiles(files) {
         if (!files.length) return;
@@ -359,10 +356,7 @@
         for (const file of files) {
             const formData = new FormData();
             formData.append('file', file);
-            await fetch('/kb/{{ kb.id }}/upload', {
-                method: 'POST',
-                body: formData
-            });
+            await fetch('/kb/{{ kb.id }}/upload', { method: 'POST', body: formData });
             uploaded++;
             uploadStatus.textContent = `Uploaded ${uploaded} of ${files.length} file(s)...`;
         }
@@ -370,6 +364,5 @@
         setTimeout(() => window.location.reload(), 800);
     }
 </script>
-
 </body>
 </html>

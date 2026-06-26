@@ -7,223 +7,110 @@
         body { font-family: Arial, sans-serif; display: flex; height: 100vh; overflow: hidden; background: #fff; }
 
         #sidebar {
-            width: 260px;
-            background: #f4f4f4;
-            border-right: 1px solid #ddd;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            flex-shrink: 0;
+            width: 260px; background: #f4f4f4; border-right: 1px solid #ddd;
+            display: flex; flex-direction: column; height: 100vh; flex-shrink: 0;
         }
-        #mode-tabs {
-            display: flex;
-            border-bottom: 1px solid #ddd;
-        }
+        #mode-tabs { display: flex; border-bottom: 1px solid #ddd; }
         .mode-tab {
-            flex: 1;
-            padding: 14px 0;
-            text-align: center;
-            font-size: 13px;
-            cursor: pointer;
-            border: none;
-            background: #f4f4f4;
-            color: #666;
-            font-weight: normal;
-            border-bottom: 2px solid transparent;
+            flex: 1; padding: 14px 0; text-align: center; font-size: 13px;
+            cursor: pointer; border: none; background: #f4f4f4; color: #666;
+            font-weight: normal; border-bottom: 2px solid transparent;
         }
-        .mode-tab.active {
-            color: #000;
-            font-weight: bold;
-            border-bottom: 2px solid #000;
-            background: #f4f4f4;
-        }
+        .mode-tab.active { color: #000; font-weight: bold; border-bottom: 2px solid #000; }
         .mode-tab:hover { background: #eee; }
-        #sidebar-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            padding: 12px;
-        }
+        #sidebar-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; padding: 12px; }
         #action-btn {
-            width: 100%;
-            background: #000;
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            margin-bottom: 12px;
+            width: 100%; background: #000; color: white; border: none;
+            padding: 10px; border-radius: 6px; cursor: pointer; font-size: 14px; margin-bottom: 8px;
         }
         #action-btn:hover { background: #333; }
+        .kb-sub-btn {
+            width: 100%; background: white; color: #000; border: 1px solid #ddd;
+            padding: 10px; border-radius: 6px; cursor: pointer; font-size: 14px;
+            margin-bottom: 8px; text-align: left;
+        }
+        .kb-sub-btn.active { background: #000; color: white; border-color: #000; }
+        .kb-sub-btn:hover { background: #f0f0f0; }
+        .kb-sub-btn.active:hover { background: #333; }
         #item-list { flex: 1; overflow-y: auto; }
         .list-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 8px 10px;
-            border-radius: 6px;
-            margin-bottom: 4px;
-            font-size: 14px;
-            cursor: pointer;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 8px 10px; border-radius: 6px; margin-bottom: 4px; font-size: 14px;
         }
         .list-item:hover { background: #e0e0e0; }
         .list-item.active { background: #ddd; font-weight: bold; }
-        .list-item a {
-            text-decoration: none;
-            color: black;
-            flex: 1;
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-        }
-        .item-delete {
-            background: none;
-            border: none;
-            color: #999;
-            cursor: pointer;
-            font-size: 16px;
-            padding: 0 4px;
-            flex-shrink: 0;
-        }
+        .list-item a { text-decoration: none; color: black; flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+        .item-delete { background: none; border: none; color: #999; cursor: pointer; font-size: 16px; padding: 0 4px; }
         .item-delete:hover { color: red; }
-        #model-area {
-            border-top: 1px solid #ddd;
-            padding-top: 12px;
-            margin-top: 8px;
-        }
-        #model-area label {
-            font-size: 11px;
-            color: #999;
-            display: block;
-            margin-bottom: 6px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        #model-selector {
-            width: 100%;
-            padding: 8px 10px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 13px;
-            cursor: pointer;
-            outline: none;
-            background: white;
-        }
-        #sidebar-footer {
-            border-top: 1px solid #ddd;
-            padding: 12px;
-        }
-        #sidebar-footer a {
-            font-size: 13px;
-            color: #666;
-            text-decoration: none;
-        }
+        #model-area { border-top: 1px solid #ddd; padding-top: 12px; margin-top: 8px; }
+        #model-area label { font-size: 11px; color: #999; display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+        #model-selector { width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; cursor: pointer; outline: none; background: white; }
+        #sidebar-footer { border-top: 1px solid #ddd; padding: 12px; }
+        #sidebar-footer a { font-size: 13px; color: #666; text-decoration: none; }
         #sidebar-footer a:hover { color: black; }
 
-        #main {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-        }
+        #main { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
 
-        /* Chat view */
-        #chat-view {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-        }
-        #chat-header {
-            padding: 16px 20px;
-            border-bottom: 1px solid #ddd;
-            font-size: 18px;
-            font-weight: bold;
-            flex-shrink: 0;
-        }
-        #messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .message {
-            max-width: 70%;
-            padding: 10px 14px;
-            border-radius: 10px;
-            font-size: 14px;
-            line-height: 1.6;
-        }
+        #chat-view { display: flex; flex-direction: column; height: 100%; }
+        #chat-header { padding: 16px 20px; border-bottom: 1px solid #ddd; font-size: 18px; font-weight: bold; flex-shrink: 0; }
+        #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+        .message { max-width: 70%; padding: 10px 14px; border-radius: 10px; font-size: 14px; line-height: 1.6; }
         .message.user { background: #000; color: white; align-self: flex-end; }
         .message.agent { background: #f0f0f0; color: black; align-self: flex-start; }
-        #input-area {
-            padding: 16px 20px;
-            border-top: 1px solid #ddd;
-            display: flex;
-            gap: 10px;
-            flex-shrink: 0;
-            background: white;
-        }
-        #message-input {
-            flex: 1;
-            padding: 10px 14px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-            outline: none;
-        }
-        #send-btn {
-            background: #000;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-        }
+        #input-area { padding: 16px 20px; border-top: 1px solid #ddd; display: flex; gap: 10px; flex-shrink: 0; background: white; }
+        #message-input { flex: 1; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; }
+        #send-btn { background: #000; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 14px; }
         #send-btn:hover { background: #333; }
-        #empty-chat {
-            color: #aaa;
-            font-size: 15px;
-            text-align: center;
-            margin-top: 60px;
-        }
+        #empty-chat { color: #aaa; font-size: 15px; text-align: center; margin-top: 60px; }
 
-        /* KB view */
-        #kb-view {
-            display: none;
-            flex-direction: column;
-            height: 100%;
-            overflow-y: auto;
-            padding: 30px;
-        }
-        #kb-view h1 { font-size: 22px; margin-bottom: 6px; }
-        #kb-view .subtitle { color: #666; font-size: 14px; margin-bottom: 24px; }
+        .kb-view-panel { display: none; flex-direction: column; height: 100%; overflow-y: auto; padding: 30px; }
+        .kb-view-panel h1 { font-size: 22px; margin-bottom: 6px; }
+        .kb-view-panel .subtitle { color: #666; font-size: 14px; margin-bottom: 24px; }
 
-        .kb-card {
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            margin-bottom: 12px;
-            overflow: hidden;
-            text-decoration: none;
-            color: black;
-            display: block;
-            transition: box-shadow 0.2s;
+        .lake-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-top: 16px; }
+        .lake-card {
+            border: 1px solid #ddd; border-radius: 10px; padding: 16px;
+            background: #fafafa; transition: box-shadow 0.2s; position: relative;
         }
-        .kb-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .kb-card-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 14px 16px;
-            background: #fafafa;
+        .lake-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .lake-card-icon { font-size: 24px; margin-bottom: 8px; }
+        .lake-card-name { font-size: 15px; font-weight: bold; margin-bottom: 8px; word-break: break-word; }
+        .lake-card-meta { font-size: 12px; color: #999; line-height: 2; }
+        .lake-card-meta span { display: block; }
+
+        /* Dashboard cards are clickable */
+        .lake-card.clickable { cursor: pointer; }
+
+        .manage-toolbar {
+            display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; align-items: center;
         }
-        .kb-card-title { font-size: 15px; font-weight: bold; }
-        .kb-card-meta { font-size: 12px; color: #999; }
+        .toolbar-btn {
+            padding: 8px 14px; border-radius: 6px; font-size: 13px;
+            cursor: pointer; border: 1px solid #ddd; background: white;
+        }
+        .toolbar-btn:hover { background: #f0f0f0; }
+        .toolbar-btn.primary { background: #000; color: white; border-color: #000; }
+        .toolbar-btn.primary:hover { background: #333; }
+        .toolbar-btn.danger { color: red; border-color: #ffcccc; }
+        .toolbar-btn.danger:hover { background: #fff0f0; }
+
+        .lake-card .card-checkbox {
+            position: absolute; top: 12px; right: 12px;
+            width: 16px; height: 16px; cursor: pointer;
+        }
+        .lake-card .card-actions {
+            display: flex; gap: 6px; margin-top: 12px; border-top: 1px solid #eee; padding-top: 10px;
+        }
+        .card-action-btn {
+            background: none; border: none; font-size: 15px; cursor: pointer;
+            padding: 4px 8px; color: #aaa; border-radius: 4px;
+        }
+        .card-action-btn:hover { color: #000; background: #eee; }
+        .rename-input {
+            width: 100%; padding: 6px 8px; border: 1px solid #ddd;
+            border-radius: 6px; font-size: 14px; outline: none; margin-bottom: 6px;
+        }
+        .rename-input:focus { border-color: #000; }
     </style>
 </head>
 <body>
@@ -231,10 +118,16 @@
 <div id="sidebar">
     <div id="mode-tabs">
         <button class="mode-tab active" id="tab-chat" onclick="switchMode('chat')">💬 Chat</button>
-        <button class="mode-tab" id="tab-kb" onclick="switchMode('kb')">📚 Knowledge</button>
+        <button class="mode-tab" id="tab-kb" onclick="switchMode('kb')">🌊 Knowledge</button>
     </div>
     <div id="sidebar-content">
         <button id="action-btn" onclick="handleAction()">+ New Chat</button>
+
+        <div id="kb-sub-buttons" style="display:none;">
+            <button class="kb-sub-btn active" id="btn-dashboard" onclick="switchKBView('dashboard')">📊 Dashboard</button>
+            <button class="kb-sub-btn" id="btn-manage" onclick="switchKBView('manage')">🗂️ Manage Lakes</button>
+        </div>
+
         <div id="item-list">
             <div id="chat-list">
                 {% for conv in conversations %}
@@ -244,16 +137,9 @@
                 </div>
                 {% endfor %}
             </div>
-            <div id="kb-list" style="display:none">
-                {% for kb in kbs %}
-                {% if not kb.parent_id %}
-                <div class="list-item">
-                    <a href="/kb/{{ kb.id }}">📚 {{ kb.name }}</a>
-                </div>
-                {% endif %}
-                {% endfor %}
-            </div>
+            <div id="kb-list" style="display:none;"></div>
         </div>
+
         <div id="model-area">
             <label>AI Model</label>
             <select id="model-selector">
@@ -269,7 +155,9 @@
 </div>
 
 <div id="main">
-    <div id="chat-view">
+
+    <!-- CHAT VIEW -->
+    <div id="chat-view" style="display:flex; flex-direction:column; height:100%;">
         <div id="chat-header">
             {% if active_conversation %}{{ active_conversation.title }}{% else %}Knowledge Agent{% endif %}
         </div>
@@ -290,48 +178,107 @@
         </div>
     </div>
 
-    <div id="kb-view">
-        <h1>📚 Knowledge Bases</h1>
-        <p class="subtitle">Click a knowledge base to open it, or create a new one below.</p>
-
-        <form action="/kb/new" method="POST" style="display:flex; gap:10px; margin-bottom:24px;">
-            <input type="text" name="name" placeholder="New knowledge base name..."
-                   style="flex:1; padding:10px 14px; border:1px solid #ddd; border-radius:8px; font-size:14px; outline:none;" required>
-            <input type="hidden" name="parent_id" value="">
-            <button type="submit"
-                    style="background:#000; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-size:14px;">
-                + Create
-            </button>
-        </form>
-
-        {% if kbs %}
+    <!-- DASHBOARD VIEW -->
+    <div id="dashboard-view" class="kb-view-panel">
+        <h1>📊 Dashboard</h1>
+        <p class="subtitle">Explore your knowledge lakes and pools.</p>
+        <input type="text" id="dashboard-search" placeholder="🔍 Search lakes by name..." onkeyup="filterDashboard()" style="width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:6px; font-size:14px; outline:none; margin-bottom:16px;">
+        <div class="lake-grid">
             {% for kb in kbs %}
             {% if not kb.parent_id %}
-            <a class="kb-card" href="/kb/{{ kb.id }}">
-                <div class="kb-card-header">
-                    <span class="kb-card-title">📚 {{ kb.name }}</span>
-                    <span class="kb-card-meta">{{ kb.files|length }} file(s) · {{ kb.children|length }} sub-KB(s) →</span>
+            <div class="lake-card clickable" onclick="window.location.href='/kb/{{ kb.id }}/explore'">
+                <div class="lake-card-icon">🌊</div>
+                <div class="lake-card-name">{{ kb.name }}</div>
+                <div class="lake-card-meta">
+                    <span>📄 {{ kb_stats[kb.id][2] }} file(s)</span>
+                    <span>💧 {{ kb.children|length }} pool(s)</span>
+                    <span>💾 {{ kb_stats[kb.id][0] }}</span>
+                    <span>🕒 {{ kb_stats[kb.id][1] }}</span>
                 </div>
-            </a>
+            </div>
             {% endif %}
             {% endfor %}
-        {% else %}
-            <p style="color:#bbb; font-style:italic;">No knowledge bases yet. Create one above!</p>
-        {% endif %}
+        </div>
     </div>
+
+    <!-- MANAGE LAKES VIEW -->
+    <div id="manage-view" class="kb-view-panel">
+        <h1>🗂️ Manage Lakes</h1>
+        <p class="subtitle">Create, rename, delete and export your knowledge lakes.</p>
+        <input type="text" id="manage-search" placeholder="🔍 Search lakes by name..." onkeyup="filterManage()" style="width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:6px; font-size:14px; outline:none; margin-bottom:16px;">
+        <div class="manage-toolbar">
+            <button class="toolbar-btn primary" onclick="toggleNewLakeForm()">+ New Lake</button>
+            <form id="import-zip-form" action="/kb/import" method="POST" enctype="multipart/form-data" style="display:inline;">
+                <input type="file" id="import-zip-input" name="zip_file" accept=".zip"
+                       onchange="sessionStorage.setItem('mode','kb'); sessionStorage.setItem('kbview','manage'); document.getElementById('import-zip-form').submit();">
+                <button type="button" class="toolbar-btn" onclick="document.getElementById('import-zip-input').click()">📥 Import ZIP</button>
+            </form>
+            <button class="toolbar-btn danger" onclick="deleteSelectedLakes()">🗑️ Delete Selected</button>
+            <button class="toolbar-btn" onclick="exportSelectedLakes()">📦 Export Selected</button>
+            <label style="font-size:13px; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                <input type="checkbox" id="select-all-lakes" onclick="toggleSelectAllLakes()"> Select All
+            </label>
+        </div>
+
+        <form id="new-lake-form" action="/kb/new" method="POST" style="display:none; gap:10px; margin-bottom:20px;">
+            <input type="text" name="name" placeholder="New knowledge lake name..."
+                   style="flex:1; padding:10px 14px; border:1px solid #ddd; border-radius:8px; font-size:14px; outline:none;" required>
+            <input type="hidden" name="parent_id" value="">
+            <button type="submit" class="toolbar-btn primary">+ Create</button>
+        </form>
+
+        <div class="lake-grid">
+            {% for kb in kbs %}
+            {% if not kb.parent_id %}
+            <div class="lake-card">
+                <input type="checkbox" class="card-checkbox lake-checkbox" data-kb-id="{{ kb.id }}">
+                <div class="lake-card-icon">🌊</div>
+                <div class="lake-card-name" id="name-display-{{ kb.id }}">{{ kb.name }}</div>
+                <input type="text" class="rename-input" id="rename-input-{{ kb.id }}"
+                       value="{{ kb.name }}" style="display:none;"
+                       onkeydown="if(event.key==='Enter') submitRename({{ kb.id }})">
+                <div class="lake-card-meta">
+                    <span>📄 {{ kb_stats[kb.id][2] }} file(s)</span>
+                    <span>💧 {{ kb.children|length }} pool(s)</span>
+                    <span>💾 {{ kb_stats[kb.id][0] }}</span>
+                    <span>🕒 {{ kb_stats[kb.id][1] }}</span>
+                </div>
+                <div class="card-actions">
+                    <button class="card-action-btn" title="Rename" onclick="toggleRenameCard({{ kb.id }})">✏️</button>
+                    <button class="card-action-btn" title="Delete" onclick="deleteLake({{ kb.id }}, '{{ kb.name }}')">🗑️</button>
+                    <button class="card-action-btn" title="Open" onclick="window.location.href='/kb/{{ kb.id }}'">📂 Open</button>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
 </div>
 
 <script>
     const conversationId = {{ active_conversation.id if active_conversation else 'null' }};
     let currentMode = 'chat';
+    let currentKBView = 'dashboard';
 
-    // Check if we should start in KB mode
     window.addEventListener('DOMContentLoaded', function() {
         const params = new URLSearchParams(window.location.search);
-        if (params.get('mode') === 'kb' || sessionStorage.getItem('mode') === 'kb') {
+        const storedMode = sessionStorage.getItem('mode');
+        const storedView = sessionStorage.getItem('kbview');
+
+        if (params.get('mode') === 'kb' || storedMode === 'kb') {
             switchMode('kb');
             sessionStorage.removeItem('mode');
         }
+        const urlView = params.get('view');
+        if (urlView === 'manage' || storedView === 'manage') {
+            switchKBView('manage');
+            sessionStorage.removeItem('kbview');
+        }
+
+        // Handle bulk delete queue
+        const queue = JSON.parse(sessionStorage.getItem('delete_queue') || '[]');
+        if (queue.length > 0) processDeleteQueue();
     });
 
     function switchMode(mode) {
@@ -340,20 +287,91 @@
         document.getElementById('tab-kb').classList.toggle('active', mode === 'kb');
         document.getElementById('chat-list').style.display = mode === 'chat' ? 'block' : 'none';
         document.getElementById('kb-list').style.display = mode === 'kb' ? 'block' : 'none';
-        document.getElementById('action-btn').textContent = mode === 'chat' ? '+ New Chat' : '+ New KB';
+        document.getElementById('kb-sub-buttons').style.display = mode === 'kb' ? 'block' : 'none';
         document.getElementById('model-area').style.display = mode === 'chat' ? 'block' : 'none';
         document.getElementById('chat-view').style.display = mode === 'chat' ? 'flex' : 'none';
-        document.getElementById('kb-view').style.display = mode === 'kb' ? 'flex' : 'none';
+        document.getElementById('action-btn').textContent = '+ New Chat';
+        document.getElementById('action-btn').style.display = mode === 'chat' ? 'block' : 'none';
+        if (mode === 'kb') {
+            switchKBView(currentKBView);
+        } else {
+            document.getElementById('dashboard-view').style.display = 'none';
+            document.getElementById('manage-view').style.display = 'none';
+        }
+    }
+
+    function switchKBView(view) {
+        currentKBView = view;
+        document.getElementById('btn-dashboard').classList.toggle('active', view === 'dashboard');
+        document.getElementById('btn-manage').classList.toggle('active', view === 'manage');
+        document.getElementById('dashboard-view').style.display = view === 'dashboard' ? 'flex' : 'none';
+        document.getElementById('manage-view').style.display = view === 'manage' ? 'flex' : 'none';
     }
 
     function handleAction() {
-        if (currentMode === 'chat') {
-            window.location.href = '/conversation/new';
-        } else {
-            const input = document.querySelector('#kb-view input[name="name"]');
-            input.scrollIntoView({ behavior: 'smooth' });
-            input.focus();
-        }
+        if (currentMode === 'chat') window.location.href = '/conversation/new';
+    }
+
+    function toggleNewLakeForm() {
+        const form = document.getElementById('new-lake-form');
+        form.style.display = form.style.display === 'none' ? 'flex' : 'none';
+    }
+
+    function toggleRenameCard(kbId) {
+        const display = document.getElementById('name-display-' + kbId);
+        const input = document.getElementById('rename-input-' + kbId);
+        const isEditing = input.style.display !== 'none';
+        display.style.display = isEditing ? 'block' : 'none';
+        input.style.display = isEditing ? 'none' : 'block';
+        if (!isEditing) input.focus();
+    }
+
+    function submitRename(kbId) {
+        const newName = document.getElementById('rename-input-' + kbId).value.trim();
+        if (!newName) return;
+        const formData = new FormData();
+        formData.append('name', newName);
+        sessionStorage.setItem('mode', 'kb');
+        sessionStorage.setItem('kbview', 'manage');
+        fetch('/kb/' + kbId + '/rename', { method: 'POST', body: formData })
+            .then(() => window.location.reload());
+    }
+
+    function deleteLake(kbId, name) {
+        if (!confirm('Delete "' + name + '" and everything inside it?')) return;
+        sessionStorage.setItem('mode', 'kb');
+        sessionStorage.setItem('kbview', 'manage');
+        window.location.href = '/kb/' + kbId + '/delete';
+    }
+
+    function toggleSelectAllLakes() {
+        const checked = document.getElementById('select-all-lakes').checked;
+        document.querySelectorAll('.lake-checkbox').forEach(cb => cb.checked = checked);
+    }
+
+    function deleteSelectedLakes() {
+        const checked = document.querySelectorAll('.lake-checkbox:checked');
+        if (checked.length === 0) { alert('Select at least one lake to delete.'); return; }
+        if (!confirm('Delete ' + checked.length + ' lake(s) and everything inside them?')) return;
+        const ids = Array.from(checked).map(cb => cb.dataset.kbId);
+        sessionStorage.setItem('delete_queue', JSON.stringify(ids));
+        sessionStorage.setItem('mode', 'kb');
+        sessionStorage.setItem('kbview', 'manage');
+        processDeleteQueue();
+    }
+
+    function processDeleteQueue() {
+        const queue = JSON.parse(sessionStorage.getItem('delete_queue') || '[]');
+        if (queue.length === 0) { window.location.reload(); return; }
+        const nextId = queue.shift();
+        sessionStorage.setItem('delete_queue', JSON.stringify(queue));
+        window.location.href = '/kb/' + nextId + '/delete';
+    }
+
+    function exportSelectedLakes() {
+        const checked = document.querySelectorAll('.lake-checkbox:checked');
+        if (checked.length === 0) { alert('Select at least one lake to export.'); return; }
+        checked.forEach(cb => window.open('/kb/' + cb.dataset.kbId + '/export/all', '_blank'));
     }
 
     document.getElementById('message-input').addEventListener('keypress', function(e) {
@@ -383,12 +401,11 @@
                 appendMessage('agent', data.response);
             } else {
                 const modelName = document.getElementById('model-selector').options[document.getElementById('model-selector').selectedIndex].text;
-                appendMessage('agent', `⚠️ ${modelName} is currently unavailable.\n\n• Check your internet connection\n• Switch to a different model\n• If using Ollama, make sure it is running`);
+                appendMessage('agent', `⚠️ ${modelName} is currently unavailable.`);
             }
         })
         .catch(() => {
-            const modelName = document.getElementById('model-selector').options[document.getElementById('model-selector').selectedIndex].text;
-            appendMessage('agent', `⚠️ ${modelName} is currently unavailable.\n\n• Check your internet connection\n• Switch to a different model\n• If using Ollama, make sure it is running`);
+            appendMessage('agent', '⚠️ Error connecting to AI model.');
         })
         .finally(() => {
             input.disabled = false;
@@ -415,6 +432,25 @@
             window.location.href = '/conversation/' + id + '/delete';
         }
     }
+
+    function filterDashboard() {
+        const query = document.getElementById('dashboard-search').value.toLowerCase();
+        document.querySelectorAll('#dashboard-view .lake-card').forEach(card => {
+            const name = card.querySelector('.lake-card-name').textContent.toLowerCase();
+            card.style.display = name.includes(query) ? 'block' : 'none';
+        });
+    }
+
+    function filterManage() {
+        const query = document.getElementById('manage-search').value.toLowerCase();
+        document.querySelectorAll('#manage-view .lake-card').forEach(card => {
+            const name = card.querySelector('.lake-card-name').textContent.toLowerCase();
+            card.style.display = name.includes(query) ? 'block' : 'none';
+        });
+    }
+
+
+
 </script>
 
 </body>

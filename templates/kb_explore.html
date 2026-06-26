@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ kb.name }} — Explore</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; display: flex; height: 100vh; overflow: hidden; background: #fff; }
+        #sidebar { width: 260px; background: #f4f4f4; border-right: 1px solid #ddd; display: flex; flex-direction: column; height: 100vh; flex-shrink: 0; padding: 16px; }
+        #sidebar h2 { font-size: 16px; margin-bottom: 16px; }
+        .nav-btn { display: block; padding: 10px; border-radius: 6px; text-decoration: none; font-size: 14px; margin-bottom: 8px; text-align: center; border: none; cursor: pointer; }
+        .nav-btn.primary { background: #000; color: white; }
+        .nav-btn.secondary { background: white; color: black; border: 1px solid #ddd; }
+        .nav-btn:hover { opacity: 0.85; }
+        .sidebar-section { margin-top: 16px; }
+        .sidebar-section h3 { font-size: 11px; color: #999; text-transform: uppercase; margin-bottom: 8px; }
+        .sidebar-item { display: block; padding: 7px 10px; border-radius: 6px; text-decoration: none; color: black; font-size: 13px; margin-bottom: 4px; }
+        .sidebar-item:hover { background: #e0e0e0; }
+        #sidebar-footer { border-top: 1px solid #ddd; padding-top: 12px; margin-top: auto; }
+        #sidebar-footer a { font-size: 13px; color: #666; text-decoration: none; }
+        #main { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        #explore-header { padding: 16px 24px; border-bottom: 1px solid #ddd; flex-shrink: 0; }
+        .breadcrumb { font-size: 13px; color: #999; margin-bottom: 8px; }
+        .breadcrumb a { color: #666; text-decoration: none; }
+        .breadcrumb a:hover { color: black; }
+        .breadcrumb span { margin: 0 6px; }
+        #explore-content { flex: 1; overflow-y: auto; padding: 24px; }
+        .info-box { background: #f9f9f9; border: 1px solid #eee; border-radius: 8px; padding: 16px; margin-bottom: 24px; }
+        .info-box h1 { font-size: 22px; margin-bottom: 8px; }
+        .info-meta { font-size: 13px; color: #666; display: flex; gap: 20px; margin-bottom: 8px; }
+        .info-desc { font-size: 13px; color: #555; margin-top: 8px; }
+        .info-instructions { font-size: 13px; color: #666; margin-top: 8px; padding: 8px; background: #fffbe6; border-radius: 6px; border-left: 3px solid #f0c040; }
+        .section-title { font-size: 12px; font-weight: bold; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; margin-top: 24px; }
+        .section-title:first-child { margin-top: 0; }
+        .lake-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+        .lake-card { border: 1px solid #ddd; border-radius: 10px; padding: 16px; background: #fafafa; cursor: pointer; transition: box-shadow 0.2s; text-decoration: none; color: black; display: block; }
+        .lake-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .lake-card-icon { font-size: 22px; margin-bottom: 8px; }
+        .lake-card-name { font-size: 14px; font-weight: bold; margin-bottom: 8px; }
+        .lake-card-meta { font-size: 12px; color: #999; line-height: 1.8; }
+        .lake-card-meta span { display: block; }
+        .file-list { list-style: none; }
+        .file-item { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border: 1px solid #eee; border-radius: 8px; margin-bottom: 6px; font-size: 14px; background: #fafafa; }
+        .file-size { font-size: 11px; color: #bbb; }
+        .no-content { color: #bbb; font-size: 14px; font-style: italic; }
+    </style>
+</head>
+<body>
+
+<div id="sidebar">
+    <h2>Knowledge Agent</h2>
+    <a class="nav-btn secondary" href="/dashboard">💬 Chat</a>
+    <a class="nav-btn primary" href="/dashboard" onclick="sessionStorage.setItem('mode','kb')">🌊 Knowledge</a>
+    {% if kb.parent %}
+    <div class="sidebar-section">
+        <h3>Parent</h3>
+        <a class="sidebar-item" href="/kb/{{ kb.parent.id }}/explore">🌊 {{ kb.parent.name }}</a>
+    </div>
+    {% endif %}
+    {% if kb.children %}
+    <div class="sidebar-section">
+        <h3>Knowledge Pools</h3>
+        {% for child in kb.children %}
+        <a class="sidebar-item" href="/kb/{{ child.id }}/explore">💧 {{ child.name }}</a>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <div id="sidebar-footer"><a href="/logout">Logout</a></div>
+</div>
+
+<div id="main">
+    <div id="explore-header">
+        <div class="breadcrumb">
+            <a href="/dashboard" onclick="sessionStorage.setItem('mode','kb')">Knowledge Lakes</a>
+            {% for crumb in breadcrumb %}
+            <span>›</span>
+            <a href="/kb/{{ crumb.id }}/explore">{{ crumb.name }}</a>
+            {% endfor %}
+            <span>›</span>
+            <strong>{{ kb.name }}</strong>
+        </div>
+    </div>
+
+    <div id="explore-content">
+        <div class="info-box">
+            <h1>🌊 {{ kb.name }}</h1>
+            <div class="info-meta">
+                <span>📄 {{ kb.files|length }} file(s)</span>
+                <span>💧 {{ kb.children|length }} pool(s)</span>
+            </div>
+            {% if kb.description %}
+            <p class="info-desc">📝 {{ kb.description }}</p>
+            {% endif %}
+            {% if kb.instructions %}
+            <p class="info-instructions">📋 <strong>Instructions:</strong> {{ kb.instructions }}</p>
+            {% endif %}
+        </div>
+
+        {% if kb.children %}
+        <div class="section-title">Knowledge Pools ({{ kb.children|length }})</div>
+        <div class="lake-grid">
+            {% for child in kb.children %}
+            <a class="lake-card" href="/kb/{{ child.id }}/explore">
+                <div class="lake-card-icon">💧</div>
+                <div class="lake-card-name">{{ child.name }}</div>
+                <div class="lake-card-meta">
+                    <span>📄 {{ child.files|length }} file(s)</span>
+                    <span>💧 {{ child.children|length }} sub-pool(s)</span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="section-title">Files ({{ kb.files|length }})</div>
+        {% if kb.files %}
+        <ul class="file-list">
+            {% for file in kb.files %}
+            <li class="file-item">
+                <span>📄</span>
+                <span>{{ file.filename }}</span>
+                <span class="file-size">{{ file.filepath | filesize }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="no-content">No files in this lake.</p>
+        {% endif %}
+    </div>
+</div>
+
+</body>
+</html>
