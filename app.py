@@ -8,9 +8,190 @@ import bcrypt
 import os
 import zipfile
 import io
+import json
+import re
+import numpy as np
 from datetime import datetime
 
 load_dotenv()
+
+from sentence_transformers import SentenceTransformer
+print("Loading embedding model...")
+embedder = SentenceTransformer('all-MiniLM-L6-v2')
+print("Embedding model loaded.")
+
+import faiss
+from rank_bm25 import BM25Okapi
+
+def semantic_chunk(text, filename):
+    if not text or not text.strip():
+        return []
+    if len(text.split()) < 150:
+        return [text]
+    chunks = []
+    table_pattern = re.compile(r'(?=Time \| Location)', re.MULTILINE)
+    table_sections = table_pattern.split(text)
+    non_table = table_sections[0] if table_sections else ''
+    tables = table_sections[1:] if len(table_sections) > 1 else []
+    if non_table.strip():
+        heading_pattern = re.compile(
+            r'(?=\n*(?:#{1,3}\s|DAY\s+\d|Day\s+\d))',
+            re.MULTILINE | re.IGNORECASE
+        )
+        sections = heading_pattern.split(non_table)
+        sections = [s.strip() for s in sections if s.strip() and len(s.split()) > 10]
+        chunks.extend(sections)
+    for table in tables:
+        if table.strip() and len(table.split()) > 10:
+            chunks.append(table.strip())
+    if not chunks:
+        words = text.split()
+        chunk_size = 400
+        overlap = 80
+        for i in range(0, len(words), chunk_size - overlap):
+            chunk = ' '.join(words[i:i + chunk_size])
+            if chunk.strip():
+                chunks.append(chunk)
+    print(f"Chunking: {len(chunks)} chunks for {filename}")
+    return chunks
+
+def describe_image_llava(filepath):
+    try:
+        import requests
+        import base64
+        with open(filepath, 'rb') as f:
+            image_data = base64.b64encode(f.read()).decode('utf-8')
+        response = requests.post('http://localhost:11434/api/generate', json={
+            'model': 'llava',
+            'prompt': 'Describe this image in detail. Include all visible text, objects, people, colors, and any other relevant information.',
+            'images': [image_data],
+            'stream': False
+        }, timeout=60)
+        if response.status_code == 200:
+            return response.json().get('response', '')
+    except Exception as e:
+        print(f"LLaVA failed: {e}")
+    return None
+
+def embed_and_store(file_id, chunks, user_id, kb_id):
+    if not chunks:
+        return
+    embeddings = embedder.encode(chunks, show_progress_bar=False)
+    embeddings = np.array(embeddings, dtype='float32')
+    faiss.normalize_L2(embeddings)
+    index = faiss.IndexFlatIP(embeddings.shape[1])
+    index.add(embeddings)
+    folder = f'embeddings/user_{user_id}/kb_{kb_id}'
+    os.makedirs(folder, exist_ok=True)
+    faiss.write_index(index, f'{folder}/file_{file_id}.index')
+    with open(f'{folder}/file_{file_id}.chunks', 'w', encoding='utf-8') as f:
+        json.dump(chunks, f, ensure_ascii=False)
+
+def hybrid_search(kb_ids, query, top_k=20, file_ids=None):
+    query_vec = embedder.encode([query], show_progress_bar=False)
+    query_vec = np.array(query_vec, dtype='float32')
+    faiss.normalize_L2(query_vec)
+    all_chunks = []
+    all_metadata = []
+
+    for kb_id in kb_ids:
+        kb = KnowledgeBase.query.get(kb_id)
+        if not kb:
+            continue
+        all_files = get_all_files(kb)
+        for f in all_files:
+            user_id = kb.user_id
+            chunks_path = f'embeddings/user_{user_id}/kb_{kb_id}/file_{f.id}.chunks'
+            index_path = f'embeddings/user_{user_id}/kb_{kb_id}/file_{f.id}.index'
+            if not os.path.exists(chunks_path):
+                if f.content:
+                    chunks = semantic_chunk(f.content, f.filename)
+                    embed_and_store(f.id, chunks, user_id, kb_id)
+                else:
+                    continue
+            if not os.path.exists(chunks_path):
+                continue
+            with open(chunks_path, 'r', encoding='utf-8') as cf:
+                chunks = json.load(cf)
+            for i, chunk in enumerate(chunks):
+                all_chunks.append(chunk)
+                all_metadata.append({
+                    'file_id': f.id,
+                    'kb_id': kb_id,
+                    'filename': f.filename,
+                    'kb_name': kb.name,
+                    'chunk_idx': i,
+                    'index_path': index_path
+                })
+
+    if file_ids:
+        for file_id in file_ids:
+            f = KBFile.query.get(file_id)
+            if not f:
+                continue
+            kb = KnowledgeBase.query.get(f.kb_id)
+            if not kb:
+                continue
+            user_id = kb.user_id
+            kb_id = f.kb_id
+            chunks_path = f'embeddings/user_{user_id}/kb_{kb_id}/file_{f.id}.chunks'
+            index_path = f'embeddings/user_{user_id}/kb_{kb_id}/file_{f.id}.index'
+            if not os.path.exists(chunks_path):
+                if f.content:
+                    chunks = semantic_chunk(f.content, f.filename)
+                    embed_and_store(f.id, chunks, user_id, kb_id)
+                else:
+                    continue
+            if not os.path.exists(chunks_path):
+                continue
+            with open(chunks_path, 'r', encoding='utf-8') as cf:
+                chunks = json.load(cf)
+            for i, chunk in enumerate(chunks):
+                all_chunks.append(chunk)
+                all_metadata.append({
+                    'file_id': f.id,
+                    'kb_id': kb_id,
+                    'filename': f.filename,
+                    'kb_name': kb.name,
+                    'chunk_idx': i,
+                    'index_path': index_path
+                })
+
+    if not all_chunks:
+        return []
+
+    tokenized = [c.lower().split() for c in all_chunks]
+    bm25 = BM25Okapi(tokenized)
+    bm25_scores = bm25.get_scores(query.lower().split())
+    faiss_scores = np.zeros(len(all_chunks))
+    seen_indexes = {}
+    for i, meta in enumerate(all_metadata):
+        index_path = meta['index_path']
+        if index_path not in seen_indexes:
+            if os.path.exists(index_path):
+                seen_indexes[index_path] = faiss.read_index(index_path)
+        if index_path in seen_indexes:
+            idx = seen_indexes[index_path]
+            chunk_idx = meta['chunk_idx']
+            if chunk_idx < idx.ntotal:
+                scores, _ = idx.search(query_vec, idx.ntotal)
+                if chunk_idx < len(scores[0]):
+                    faiss_scores[i] = max(0, scores[0][chunk_idx])
+
+    bm25_norm = bm25_scores / bm25_scores.max() if bm25_scores.max() > 0 else bm25_scores
+    faiss_norm = faiss_scores / faiss_scores.max() if faiss_scores.max() > 0 else faiss_scores
+    combined = 0.4 * bm25_norm + 0.6 * faiss_norm
+    top_indices = np.argsort(combined)[::-1][:top_k]
+    results = []
+    for idx in top_indices:
+        if combined[idx] > 0:
+            results.append({
+                'score': float(combined[idx]),
+                'content': all_chunks[idx],
+                'filename': all_metadata[idx]['filename'],
+                'kb_name': all_metadata[idx]['kb_name']
+            })
+    return results
 
 def extract_text(filepath, filename):
     ext = filename.rsplit('.', 1)[-1].lower()
@@ -22,11 +203,11 @@ def extract_text(filepath, filename):
             with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
                 from markdownify import markdownify
                 return markdownify(f.read())
-        elif ext in ['json']:
-            import json
+        elif ext == 'json':
+            import json as jl
             with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
-                data = json.load(f)
-                return f"```json\n{json.dumps(data, indent=2)}\n```"
+                data = jl.load(f)
+                return f"```json\n{jl.dumps(data, indent=2)}\n```"
         elif ext in ['xml', 'csv']:
             with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
                 return f.read()
@@ -35,6 +216,18 @@ def extract_text(filepath, filename):
             doc = fitz.open(filepath)
             lines = []
             for page in doc:
+                try:
+                    tabs = page.find_tables()
+                    if tabs and tabs.tables:
+                        for table in tabs.tables:
+                            rows = table.extract()
+                            for row in rows:
+                                cells = [str(c).strip() if c else '' for c in row]
+                                row_text = ' | '.join(c for c in cells if c)
+                                if row_text.strip():
+                                    lines.append(row_text)
+                except:
+                    pass
                 blocks = page.get_text('dict')['blocks']
                 for block in blocks:
                     if block['type'] == 0:
@@ -56,19 +249,27 @@ def extract_text(filepath, filename):
             doc = Document(filepath)
             lines = []
             for para in doc.paragraphs:
-                if not para.text.strip():
-                    continue
-                style = para.style.name.lower()
-                if 'heading 1' in style:
-                    lines.append(f"\n# {para.text}")
-                elif 'heading 2' in style:
-                    lines.append(f"\n## {para.text}")
-                elif 'heading 3' in style:
-                    lines.append(f"\n### {para.text}")
-                elif 'list' in style:
-                    lines.append(f"- {para.text}")
-                else:
-                    lines.append(para.text)
+                if para.text.strip():
+                    style = para.style.name.lower()
+                    if 'heading 1' in style:
+                        lines.append(f"\n# {para.text}")
+                    elif 'heading 2' in style:
+                        lines.append(f"\n## {para.text}")
+                    elif 'heading 3' in style:
+                        lines.append(f"\n### {para.text}")
+                    else:
+                        lines.append(para.text)
+            for table in doc.tables:
+                lines.append('\n')
+                for row in table.rows:
+                    row_cells = []
+                    for cell in row.cells:
+                        cell_text = cell.text.strip().replace('\n', ' ')
+                        if cell_text:
+                            row_cells.append(cell_text)
+                    if row_cells:
+                        lines.append(' | '.join(row_cells))
+                lines.append('\n')
             return '\n'.join(lines)
         elif ext in ['xlsx', 'xls']:
             import openpyxl
@@ -94,13 +295,22 @@ def extract_text(filepath, filename):
             for i, slide in enumerate(prs.slides):
                 lines.append(f"\n## Slide {i + 1}\n")
                 for shape in slide.shapes:
-                    if hasattr(shape, 'text') and shape.text.strip():
+                    if shape.has_table:
+                        for row in shape.table.rows:
+                            cells = [cell.text.strip() for cell in row.cells]
+                            row_text = ' | '.join(c for c in cells if c)
+                            if row_text:
+                                lines.append(row_text)
+                    elif hasattr(shape, 'text') and shape.text.strip():
                         if shape.shape_type == 13:
                             continue
                         lines.append(f"- {shape.text.strip()}")
             return '\n'.join(lines)
         elif ext in ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'tiff']:
-            return f'[Image file: {filename}]'
+            description = describe_image_llava(filepath)
+            if description:
+                return f"[Image: {filename}]\nDescription: {description}"
+            return f"[Image file: {filename}]"
         elif ext in ['mp3', 'wav', 'mp4']:
             return f'[Media file: {filename}]'
         else:
@@ -109,7 +319,6 @@ def extract_text(filepath, filename):
         return f'[Could not extract text: {str(e)}]'
 
 def get_all_files(kb):
-    """Recursively get all files from a KB and all its children."""
     files = list(kb.files)
     for child in kb.children:
         files.extend(get_all_files(child))
@@ -133,6 +342,21 @@ def get_kb_stats(kb):
         size_str = f"{total_size / (1024*1024):.1f} MB"
     date_str = datetime.fromtimestamp(last_modified).strftime('%Y-%m-%d %H:%M') if last_modified else 'No files yet'
     return size_str, date_str, len(all_files)
+
+def flatten_kb_tree(kb, path='', level=0):
+    full_path = (path + ' > ' + kb.name) if path else kb.name
+    result = [{'id': kb.id, 'name': kb.name, 'path': full_path, 'level': level, 'has_children': len(kb.children) > 0}]
+    for child in kb.children:
+        result.extend(flatten_kb_tree(child, full_path, level + 1))
+    return result
+
+def build_kb_path(kb):
+    path_parts = []
+    current = kb
+    while current:
+        path_parts.insert(0, current.name)
+        current = current.parent
+    return ' > '.join(path_parts)
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
@@ -167,6 +391,8 @@ class User(UserMixin, db.Model):
 class Conversation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), default='New Conversation')
+    mode = db.Column(db.String(20), default='chat')
+    kb_selections = db.Column(db.Text, default='{}')
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     messages = db.relationship('Message', backref='conversation', lazy=True, cascade='all, delete-orphan')
 
@@ -247,20 +473,83 @@ def dashboard(conversation_id=None):
         messages = Message.query.filter_by(conversation_id=active_conversation.id).all()
     kbs = KnowledgeBase.query.filter_by(user_id=current_user.id).all()
     kb_stats = {kb.id: get_kb_stats(kb) for kb in kbs}
+    root_kbs = [kb for kb in kbs if not kb.parent_id]
+    kb_tree_flat = []
+    for kb in root_kbs:
+        kb_tree_flat.extend(flatten_kb_tree(kb))
+    active_kb_selections = []
+    if active_conversation and active_conversation.kb_selections:
+        try:
+            selections = json.loads(active_conversation.kb_selections)
+            if isinstance(selections, list):
+                kb_ids_sel = selections
+                file_ids_sel = []
+            else:
+                kb_ids_sel = selections.get('kb_ids', [])
+                file_ids_sel = selections.get('file_ids', [])
+            for kb_id in kb_ids_sel:
+                kb = KnowledgeBase.query.get(kb_id)
+                if kb:
+                    active_kb_selections.append({'id': kb.id, 'path': build_kb_path(kb)})
+            for file_id in file_ids_sel:
+                f = KBFile.query.get(file_id)
+                if f:
+                    kb = KnowledgeBase.query.get(f.kb_id)
+                    if kb:
+                        active_kb_selections.append({'id': f'file_{f.id}', 'path': build_kb_path(kb) + ' > ' + f.filename})
+        except:
+            pass
     return render_template('dashboard.html',
         conversations=conversations,
         active_conversation=active_conversation,
         messages=messages,
         kbs=kbs,
-        kb_stats=kb_stats)
+        root_kbs=root_kbs,
+        kb_tree_flat=kb_tree_flat,
+        kb_stats=kb_stats,
+        active_kb_selections=active_kb_selections)
 
-@app.route('/conversation/new')
+@app.route('/conversation/new', methods=['GET', 'POST'])
 @login_required
 def new_conversation():
+    if request.method == 'POST':
+        data = request.get_json()
+        title = data.get('title', 'New Conversation')
+        mode = data.get('mode', 'chat')
+        kb_ids = data.get('kb_ids', [])
+        file_ids = data.get('file_ids', [])
+        selections = {'kb_ids': kb_ids, 'file_ids': file_ids}
+        conv = Conversation(title=title, mode=mode, kb_selections=json.dumps(selections), user_id=current_user.id)
+        db.session.add(conv)
+        db.session.commit()
+        return jsonify({'conversation_id': conv.id})
     conv = Conversation(title='New Conversation', user_id=current_user.id)
     db.session.add(conv)
     db.session.commit()
     return redirect(url_for('dashboard', conversation_id=conv.id))
+
+@app.route('/conversation/<int:conversation_id>/update', methods=['POST'])
+@login_required
+def update_conversation(conversation_id):
+    conv = Conversation.query.get(conversation_id)
+    if not conv or conv.user_id != current_user.id:
+        return jsonify({'error': 'Invalid'}), 400
+    data = request.get_json()
+    if 'title' in data:
+        conv.title = data['title']
+    if 'mode' in data:
+        conv.mode = data['mode']
+    if 'kb_ids' in data:
+        try:
+            existing = json.loads(conv.kb_selections or '{}')
+            if isinstance(existing, list):
+                existing = {'kb_ids': existing, 'file_ids': []}
+        except:
+            existing = {'kb_ids': [], 'file_ids': []}
+        existing['kb_ids'] = data['kb_ids']
+        conv.kb_selections = json.dumps(existing)
+    db.session.commit()
+    return jsonify({'success': True})
 
 @app.route('/conversation/<int:conversation_id>/delete')
 @login_required
@@ -291,6 +580,15 @@ def call_ollama(message):
     })
     return response.json()['message']['content']
 
+def call_gemma(message):
+    import requests
+    response = requests.post('http://localhost:11434/api/chat', json={
+        'model': 'gemma3:4b',
+        'messages': [{'role': 'user', 'content': message}],
+        'stream': False
+    })
+    return response.json()['message']['content']
+
 @app.route('/chat', methods=['POST'])
 @login_required
 def chat():
@@ -298,32 +596,102 @@ def chat():
     user_message = data.get('message', '')
     conversation_id = data.get('conversation_id')
     model = data.get('model', 'gemini')
+
     conv = Conversation.query.get(conversation_id)
     if not conv or conv.user_id != current_user.id:
         return jsonify({'error': 'Invalid conversation'}), 400
+
     if conv.title == 'New Conversation':
         conv.title = user_message[:50]
         db.session.commit()
+
     user_msg = Message(role='user', content=user_message, conversation_id=conv.id)
     db.session.add(user_msg)
     db.session.commit()
+
+    prompt = user_message
+    sources_used = []
+
+    if conv.mode == 'knowledge':
+        try:
+            selections = json.loads(conv.kb_selections or '{}')
+            if isinstance(selections, list):
+                kb_ids = selections
+                file_ids = []
+            else:
+                kb_ids = selections.get('kb_ids', [])
+                file_ids = selections.get('file_ids', [])
+        except:
+            kb_ids = []
+            file_ids = []
+
+        if kb_ids or file_ids:
+            chunks = hybrid_search(kb_ids, user_message, top_k=20, file_ids=file_ids)
+            if chunks:
+                context_parts = []
+                total_words = 0
+                token_budget = 20000
+                for chunk in chunks:
+                    chunk_words = len(chunk['content'].split())
+                    if total_words + chunk_words > token_budget:
+                        break
+                    context_parts.append(f"[{chunk['kb_name']} / {chunk['filename']}]\n{chunk['content']}")
+                    sources_used.append(f"{chunk['kb_name']} / {chunk['filename']}")
+                    total_words += chunk_words
+
+                instructions_parts = []
+                for kb_id in kb_ids:
+                    kb = KnowledgeBase.query.get(kb_id)
+                    if kb and kb.instructions:
+                        instructions_parts.append(f"Instructions for {kb.name}: {kb.instructions}")
+
+                context_block = '\n\n---\n\n'.join(context_parts)
+                instructions_section = f"INSTRUCTIONS:\n{chr(10).join(instructions_parts)}\n\n" if instructions_parts else ""
+
+                prompt = f"""You are a smart friendly personal assistant with access to the user's personal documents.
+
+{instructions_section}RELEVANT CONTENT FROM USER'S DOCUMENTS:
+{context_block}
+
+Guidelines:
+- Be natural, warm and conversational
+- Use the document content above as your primary source
+- Give complete detailed answers using ALL relevant information
+- When documents contain tables with times/locations/activities, list them all clearly
+- Combine document knowledge with general knowledge when helpful
+- For greetings or off-topic questions just respond normally
+
+User: {user_message}
+Assistant:"""
+
     try:
         if model == 'groq':
-            answer = call_groq(user_message)
+            answer = call_groq(prompt)
         elif model == 'ollama':
-            answer = call_ollama(user_message)
+            answer = call_ollama(prompt)
+        elif model == 'gemma':
+            answer = call_gemma(prompt)
         else:
-            answer = call_gemini(user_message)
+            answer = call_gemini(prompt)
     except Exception as e:
         try:
-            answer = call_groq(user_message)
+            answer = call_groq(prompt)
             answer = '⚡ (Gemini unavailable, using Groq as backup)\n\n' + answer
         except:
             return jsonify({'error': 'All models unavailable. Please try again.'}), 503
+
+    if sources_used:
+        unique_sources = list(dict.fromkeys(sources_used))
+        answer += '\n\n---\n📚 **Sources:** ' + ', '.join(unique_sources)
+
     agent_msg = Message(role='agent', content=answer, conversation_id=conv.id)
     db.session.add(agent_msg)
     db.session.commit()
-    return jsonify({'response': answer, 'conversation_id': conv.id})
+
+    actual_model = model
+    if model == 'gemini' and '⚡' in answer:
+        actual_model = 'groq'
+    return jsonify({'response': answer, 'conversation_id': conv.id, 'model_used': actual_model})
 
 @app.route('/logout')
 @login_required
@@ -379,6 +747,9 @@ def kb_import_global():
             content = extract_text(filepath, filename)
             kb_file = KBFile(filename=filename, filepath=filepath, content=content, kb_id=new_kb.id)
             db.session.add(kb_file)
+            db.session.flush()
+            chunks = semantic_chunk(content, filename)
+            embed_and_store(kb_file.id, chunks, current_user.id, new_kb.id)
     db.session.commit()
     return redirect(url_for('kb_detail', kb_id=new_kb.id))
 
@@ -450,6 +821,9 @@ def kb_upload(kb_id):
         content = extract_text(filepath, filename)
         kb_file = KBFile(filename=filename, filepath=filepath, content=content, kb_id=kb_id)
         db.session.add(kb_file)
+        db.session.flush()
+        chunks = semantic_chunk(content, filename)
+        embed_and_store(kb_file.id, chunks, current_user.id, kb_id)
         db.session.commit()
     return redirect(url_for('kb_detail', kb_id=kb_id))
 
@@ -460,6 +834,12 @@ def kb_file_delete(kb_id, file_id):
     if f and f.kb_id == kb_id:
         if os.path.exists(f.filepath):
             os.remove(f.filepath)
+        kb = KnowledgeBase.query.get(kb_id)
+        if kb:
+            for ext in ['index', 'chunks']:
+                p = f'embeddings/user_{kb.user_id}/kb_{kb_id}/file_{file_id}.{ext}'
+                if os.path.exists(p):
+                    os.remove(p)
         db.session.delete(f)
         db.session.commit()
     return redirect(url_for('kb_detail', kb_id=kb_id))
@@ -489,8 +869,7 @@ def kb_description_save(kb_id):
     kb = KnowledgeBase.query.get(kb_id)
     if not kb or kb.user_id != current_user.id:
         return jsonify({'success': False}), 400
-    description = request.form.get('description', '').strip()
-    kb.description = description
+    kb.description = request.form.get('description', '').strip()
     db.session.commit()
     return redirect(url_for('kb_detail', kb_id=kb_id))
 
@@ -500,8 +879,7 @@ def kb_instructions_save(kb_id):
     kb = KnowledgeBase.query.get(kb_id)
     if not kb or kb.user_id != current_user.id:
         return jsonify({'success': False}), 400
-    instructions = request.form.get('instructions', '').strip()
-    kb.instructions = instructions
+    kb.instructions = request.form.get('instructions', '').strip()
     db.session.commit()
     return redirect(url_for('kb_detail', kb_id=kb_id))
 
@@ -551,6 +929,10 @@ def kb_files_delete_selected(kb_id):
         if f and f.kb_id == kb_id:
             if os.path.exists(f.filepath):
                 os.remove(f.filepath)
+            for ext in ['index', 'chunks']:
+                p = f'embeddings/user_{kb.user_id}/kb_{kb_id}/file_{f.id}.{ext}'
+                if os.path.exists(p):
+                    os.remove(p)
             db.session.delete(f)
     db.session.commit()
     return jsonify({'success': True})

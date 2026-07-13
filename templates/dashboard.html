@@ -6,37 +6,20 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; display: flex; height: 100vh; overflow: hidden; background: #fff; }
 
-        #sidebar {
-            width: 260px; background: #f4f4f4; border-right: 1px solid #ddd;
-            display: flex; flex-direction: column; height: 100vh; flex-shrink: 0;
-        }
+        #sidebar { width: 260px; background: #f4f4f4; border-right: 1px solid #ddd; display: flex; flex-direction: column; height: 100vh; flex-shrink: 0; }
         #mode-tabs { display: flex; border-bottom: 1px solid #ddd; }
-        .mode-tab {
-            flex: 1; padding: 14px 0; text-align: center; font-size: 13px;
-            cursor: pointer; border: none; background: #f4f4f4; color: #666;
-            font-weight: normal; border-bottom: 2px solid transparent;
-        }
+        .mode-tab { flex: 1; padding: 14px 0; text-align: center; font-size: 13px; cursor: pointer; border: none; background: #f4f4f4; color: #666; font-weight: normal; border-bottom: 2px solid transparent; }
         .mode-tab.active { color: #000; font-weight: bold; border-bottom: 2px solid #000; }
         .mode-tab:hover { background: #eee; }
         #sidebar-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; padding: 12px; }
-        #action-btn {
-            width: 100%; background: #000; color: white; border: none;
-            padding: 10px; border-radius: 6px; cursor: pointer; font-size: 14px; margin-bottom: 8px;
-        }
+        #action-btn { width: 100%; background: #000; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-size: 14px; margin-bottom: 8px; }
         #action-btn:hover { background: #333; }
-        .kb-sub-btn {
-            width: 100%; background: white; color: #000; border: 1px solid #ddd;
-            padding: 10px; border-radius: 6px; cursor: pointer; font-size: 14px;
-            margin-bottom: 8px; text-align: left;
-        }
+        .kb-sub-btn { width: 100%; background: white; color: #000; border: 1px solid #ddd; padding: 10px; border-radius: 6px; cursor: pointer; font-size: 14px; margin-bottom: 8px; text-align: left; }
         .kb-sub-btn.active { background: #000; color: white; border-color: #000; }
         .kb-sub-btn:hover { background: #f0f0f0; }
         .kb-sub-btn.active:hover { background: #333; }
         #item-list { flex: 1; overflow-y: auto; }
-        .list-item {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 8px 10px; border-radius: 6px; margin-bottom: 4px; font-size: 14px;
-        }
+        .list-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; border-radius: 6px; margin-bottom: 4px; font-size: 14px; }
         .list-item:hover { background: #e0e0e0; }
         .list-item.active { background: #ddd; font-weight: bold; }
         .list-item a { text-decoration: none; color: black; flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
@@ -52,11 +35,22 @@
         #main { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
 
         #chat-view { display: flex; flex-direction: column; height: 100%; }
-        #chat-header { padding: 16px 20px; border-bottom: 1px solid #ddd; font-size: 18px; font-weight: bold; flex-shrink: 0; }
+        #chat-header { padding: 12px 20px; border-bottom: 1px solid #ddd; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        #chat-header-left { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
+        #chat-title { font-size: 18px; font-weight: bold; }
+        #chat-mode-badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 10px; background: #f0f0f0; color: #666; }
+        #chat-mode-badge.knowledge { background: #e8f4fd; color: #0066cc; }
+        #kb-tags-row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+        .kb-tag { display: inline-flex; align-items: center; gap: 4px; background: #e8f4fd; border: 1px solid #b3d9f7; color: #0066cc; border-radius: 12px; padding: 2px 8px; font-size: 11px; }
+        #chat-header-right { display: flex; gap: 6px; flex-shrink: 0; }
+        .header-btn { padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; border: 1px solid #ddd; background: white; }
+        .header-btn:hover { background: #f0f0f0; }
+
         #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
         .message { max-width: 70%; padding: 10px 14px; border-radius: 10px; font-size: 14px; line-height: 1.6; }
         .message.user { background: #000; color: white; align-self: flex-end; }
         .message.agent { background: #f0f0f0; color: black; align-self: flex-start; }
+        .model-tag { font-size: 10px; color: #999; margin-bottom: 4px; }
         #input-area { padding: 16px 20px; border-top: 1px solid #ddd; display: flex; gap: 10px; flex-shrink: 0; background: white; }
         #message-input { flex: 1; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; }
         #send-btn { background: #000; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 14px; }
@@ -65,55 +59,167 @@
 
         .kb-view-panel { display: none; flex-direction: column; height: 100%; overflow-y: auto; padding: 30px; }
         .kb-view-panel h1 { font-size: 22px; margin-bottom: 6px; }
-        .kb-view-panel .subtitle { color: #666; font-size: 14px; margin-bottom: 24px; }
-
+        .kb-view-panel .subtitle { color: #666; font-size: 14px; margin-bottom: 16px; }
         .lake-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-top: 16px; }
-        .lake-card {
-            border: 1px solid #ddd; border-radius: 10px; padding: 16px;
-            background: #fafafa; transition: box-shadow 0.2s; position: relative;
-        }
+        .lake-card { border: 1px solid #ddd; border-radius: 10px; padding: 16px; background: #fafafa; transition: box-shadow 0.2s; position: relative; }
         .lake-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .lake-card.clickable { cursor: pointer; }
         .lake-card-icon { font-size: 24px; margin-bottom: 8px; }
         .lake-card-name { font-size: 15px; font-weight: bold; margin-bottom: 8px; word-break: break-word; }
         .lake-card-meta { font-size: 12px; color: #999; line-height: 2; }
         .lake-card-meta span { display: block; }
-
-        /* Dashboard cards are clickable */
-        .lake-card.clickable { cursor: pointer; }
-
-        .manage-toolbar {
-            display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; align-items: center;
-        }
-        .toolbar-btn {
-            padding: 8px 14px; border-radius: 6px; font-size: 13px;
-            cursor: pointer; border: 1px solid #ddd; background: white;
-        }
+        .manage-toolbar { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+        .toolbar-btn { padding: 8px 14px; border-radius: 6px; font-size: 13px; cursor: pointer; border: 1px solid #ddd; background: white; }
         .toolbar-btn:hover { background: #f0f0f0; }
         .toolbar-btn.primary { background: #000; color: white; border-color: #000; }
         .toolbar-btn.primary:hover { background: #333; }
         .toolbar-btn.danger { color: red; border-color: #ffcccc; }
         .toolbar-btn.danger:hover { background: #fff0f0; }
-
-        .lake-card .card-checkbox {
-            position: absolute; top: 12px; right: 12px;
-            width: 16px; height: 16px; cursor: pointer;
-        }
-        .lake-card .card-actions {
-            display: flex; gap: 6px; margin-top: 12px; border-top: 1px solid #eee; padding-top: 10px;
-        }
-        .card-action-btn {
-            background: none; border: none; font-size: 15px; cursor: pointer;
-            padding: 4px 8px; color: #aaa; border-radius: 4px;
-        }
+        .lake-card .card-checkbox { position: absolute; top: 12px; right: 12px; width: 16px; height: 16px; cursor: pointer; }
+        .lake-card .card-actions { display: flex; gap: 6px; margin-top: 12px; border-top: 1px solid #eee; padding-top: 10px; }
+        .card-action-btn { background: none; border: none; font-size: 15px; cursor: pointer; padding: 4px 8px; color: #aaa; border-radius: 4px; }
         .card-action-btn:hover { color: #000; background: #eee; }
-        .rename-input {
-            width: 100%; padding: 6px 8px; border: 1px solid #ddd;
-            border-radius: 6px; font-size: 14px; outline: none; margin-bottom: 6px;
-        }
+        .rename-input { width: 100%; padding: 6px 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; outline: none; margin-bottom: 6px; }
         .rename-input:focus { border-color: #000; }
+
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+        .modal-overlay.show { display: flex; }
+        .modal { background: white; border-radius: 12px; width: 560px; max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
+        .modal-header { padding: 20px 24px; border-bottom: 1px solid #eee; display: flex; align-items: center; justify-content: space-between; }
+        .modal-header h2 { font-size: 18px; }
+        .modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: #999; }
+        .modal-close:hover { color: #000; }
+        .modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+        .modal-footer { padding: 16px 24px; border-top: 1px solid #eee; display: flex; gap: 8px; justify-content: flex-end; }
+
+        .form-group { margin-bottom: 16px; }
+        .form-group label { font-size: 12px; color: #999; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 6px; }
+        .form-group input[type="text"] { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; outline: none; }
+        .form-group input[type="text"]:focus { border-color: #000; }
+
+        .mode-toggle { display: flex; gap: 8px; margin-bottom: 16px; }
+        .mode-toggle-btn { flex: 1; padding: 10px; border-radius: 6px; font-size: 14px; cursor: pointer; border: 1px solid #ddd; background: white; text-align: center; }
+        .mode-toggle-btn.active { background: #000; color: white; border-color: #000; }
+
+        .selected-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; min-height: 32px; }
+        .selected-tag { display: inline-flex; align-items: center; gap: 4px; background: #e8f4fd; border: 1px solid #b3d9f7; color: #0066cc; border-radius: 12px; padding: 4px 10px; font-size: 12px; }
+        .selected-tag button { background: none; border: none; cursor: pointer; color: #0066cc; font-size: 14px; padding: 0; line-height: 1; }
+        .selected-tag button:hover { color: red; }
+
+        .kb-tree { border: 1px solid #ddd; border-radius: 6px; max-height: 200px; overflow-y: auto; }
+        .kb-tree-item { padding: 8px 12px; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #f0f0f0; }
+        .kb-tree-item:last-child { border-bottom: none; }
+        .kb-tree-item:hover { background: #f9f9f9; }
+        .kb-tree-item.selected { background: #e8f4fd; }
+        .tree-toggle { cursor: pointer; color: #666; font-size: 10px; width: 14px; display: inline-block; transition: transform 0.2s; }
+        .tree-toggle.open { transform: rotate(90deg); }
+        .tree-children { border-left: 1px dashed #ddd; margin-left: 20px; }
+
+        #config-panel { display: none; position: absolute; right: 0; top: 60px; width: 320px; background: white; border: 1px solid #ddd; border-radius: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.1); z-index: 100; padding: 16px; }
+        #config-panel.show { display: block; }
+        #config-panel h3 { font-size: 14px; margin-bottom: 12px; }
+        .config-section { margin-bottom: 16px; }
+        .config-section label { font-size: 11px; color: #999; text-transform: uppercase; display: block; margin-bottom: 6px; }
     </style>
 </head>
 <body>
+
+<div class="modal-overlay" id="new-chat-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <h2>✨ New Conversation</h2>
+            <button class="modal-close" onclick="closeNewChatModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Conversation Title</label>
+                <input type="text" id="new-chat-title" placeholder="Enter a title..." value="New Conversation">
+            </div>
+            <div class="form-group">
+                <label>Mode</label>
+                <div class="mode-toggle">
+                    <button class="mode-toggle-btn active" id="modal-mode-chat" onclick="setModalMode('chat')">💬 Chat</button>
+                    <button class="mode-toggle-btn" id="modal-mode-knowledge" onclick="setModalMode('knowledge')">🧠 Knowledge</button>
+                </div>
+            </div>
+            <div class="form-group" id="kb-selector-section" style="display:none;">
+                <label>Knowledge Sources</label>
+                <div class="selected-tags" id="selected-tags">
+                    <span style="color:#bbb; font-size:13px; padding:4px 0;">No sources selected yet</span>
+                </div>
+                <input type="text" id="kb-tree-search" placeholder="🔍 Search lakes, pools and files..."
+                       oninput="filterKBTree()"
+                       style="width:100%; padding:8px 10px; border:1px solid #ddd; border-radius:6px; font-size:13px; outline:none; margin-bottom:8px;">
+                <div class="kb-tree" id="kb-tree">
+                    {% for kb in root_kbs %}
+                    <div class="tree-node">
+                        <div class="kb-tree-item" data-kb-id="{{ kb.id }}" data-path="{{ kb.name }}" data-name="{{ kb.name }}" data-type="lake"
+                             onclick="toggleModalKB({{ kb.id }}, '{{ kb.name }}', 'lake')">
+                            {% if kb.children or kb.files %}
+                            <span class="tree-toggle" onclick="event.stopPropagation(); toggleTreeNode(this)">▶</span>
+                            {% else %}
+                            <span style="width:14px; display:inline-block;"></span>
+                            {% endif %}
+                            <span>🌊</span>
+                            <span>{{ kb.name }}</span>
+                        </div>
+                        {% if kb.children or kb.files %}
+                        <div class="tree-children" style="display:none;">
+                            {% for file in kb.files %}
+                            <div class="kb-tree-item" data-kb-id="{{ kb.id }}" data-file-id="{{ file.id }}" data-path="{{ kb.name }} > {{ file.filename }}" data-name="{{ file.filename }}" data-type="file"
+                                 onclick="toggleModalKB('file_{{ file.id }}', '{{ kb.name }} > {{ file.filename }}', 'file')">
+                                <span style="width:14px; display:inline-block;"></span>
+                                <span>📄</span>
+                                <span>{{ file.filename }}</span>
+                            </div>
+                            {% endfor %}
+                            {% for child in kb.children %}
+                            <div class="tree-node">
+                                <div class="kb-tree-item" data-kb-id="{{ child.id }}" data-path="{{ kb.name }} > {{ child.name }}" data-name="{{ child.name }}" data-type="pool"
+                                     onclick="toggleModalKB({{ child.id }}, '{{ kb.name }} > {{ child.name }}', 'pool')">
+                                    {% if child.children or child.files %}
+                                    <span class="tree-toggle" onclick="event.stopPropagation(); toggleTreeNode(this)">▶</span>
+                                    {% else %}
+                                    <span style="width:14px; display:inline-block;"></span>
+                                    {% endif %}
+                                    <span>💧</span>
+                                    <span>{{ child.name }}</span>
+                                </div>
+                                {% if child.children or child.files %}
+                                <div class="tree-children" style="display:none;">
+                                    {% for file in child.files %}
+                                    <div class="kb-tree-item" data-kb-id="{{ child.id }}" data-file-id="{{ file.id }}" data-path="{{ kb.name }} > {{ child.name }} > {{ file.filename }}" data-name="{{ file.filename }}" data-type="file"
+                                         onclick="toggleModalKB('file_{{ file.id }}', '{{ kb.name }} > {{ child.name }} > {{ file.filename }}', 'file')">
+                                        <span style="width:14px; display:inline-block;"></span>
+                                        <span>📄</span>
+                                        <span>{{ file.filename }}</span>
+                                    </div>
+                                    {% endfor %}
+                                    {% for grandchild in child.children %}
+                                    <div class="kb-tree-item" data-kb-id="{{ grandchild.id }}" data-path="{{ kb.name }} > {{ child.name }} > {{ grandchild.name }}" data-name="{{ grandchild.name }}" data-type="pool"
+                                         onclick="toggleModalKB({{ grandchild.id }}, '{{ kb.name }} > {{ child.name }} > {{ grandchild.name }}', 'pool')">
+                                        <span style="width:14px; display:inline-block;"></span>
+                                        <span>💧</span>
+                                        <span>{{ grandchild.name }}</span>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="toolbar-btn" onclick="closeNewChatModal()">Cancel</button>
+            <button class="toolbar-btn primary" onclick="createNewChat()">Start Conversation</button>
+        </div>
+    </div>
+</div>
 
 <div id="sidebar">
     <div id="mode-tabs">
@@ -122,12 +228,10 @@
     </div>
     <div id="sidebar-content">
         <button id="action-btn" onclick="handleAction()">+ New Chat</button>
-
         <div id="kb-sub-buttons" style="display:none;">
             <button class="kb-sub-btn active" id="btn-dashboard" onclick="switchKBView('dashboard')">📊 Dashboard</button>
             <button class="kb-sub-btn" id="btn-manage" onclick="switchKBView('manage')">🗂️ Manage Lakes</button>
         </div>
-
         <div id="item-list">
             <div id="chat-list">
                 {% for conv in conversations %}
@@ -139,28 +243,105 @@
             </div>
             <div id="kb-list" style="display:none;"></div>
         </div>
-
         <div id="model-area">
             <label>AI Model</label>
             <select id="model-selector">
                 <option value="gemini">🌐 Google Gemini</option>
                 <option value="groq">⚡ Groq Llama</option>
-                <option value="ollama">🦙 Ollama (Offline)</option>
+                <option value="ollama">🦙 Llama 3.2 (Offline)</option>
+                <option value="gemma">💎 Gemma 3 (Offline)</option>
             </select>
         </div>
     </div>
-    <div id="sidebar-footer">
-        <a href="/logout">Logout</a>
-    </div>
+    <div id="sidebar-footer"><a href="/logout">Logout</a></div>
 </div>
 
 <div id="main">
-
-    <!-- CHAT VIEW -->
-    <div id="chat-view" style="display:flex; flex-direction:column; height:100%;">
+    <div id="chat-view" style="display:flex; flex-direction:column; height:100%; position:relative;">
         <div id="chat-header">
-            {% if active_conversation %}{{ active_conversation.title }}{% else %}Knowledge Agent{% endif %}
+            <div id="chat-header-left">
+                <div id="chat-title">
+                    {% if active_conversation %}{{ active_conversation.title }}{% else %}Knowledge Agent{% endif %}
+                </div>
+                {% if active_conversation %}
+                <div>
+                    <span id="chat-mode-badge" class="{% if active_conversation.mode == 'knowledge' %}knowledge{% endif %}">
+                        {% if active_conversation.mode == 'knowledge' %}🧠 Knowledge Mode{% else %}💬 Chat Mode{% endif %}
+                    </span>
+                </div>
+                {% if active_conversation.mode == 'knowledge' and active_kb_selections %}
+                <div id="kb-tags-row">
+                    {% for sel in active_kb_selections %}
+                    <span class="kb-tag">🌊 {{ sel.path }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% endif %}
+            </div>
+            {% if active_conversation %}
+            <div id="chat-header-right">
+                <button class="header-btn" onclick="toggleConfig()">⚙️ Config</button>
+            </div>
+            {% endif %}
         </div>
+
+        {% if active_conversation %}
+        <div id="config-panel">
+            <h3>⚙️ Conversation Config</h3>
+            <div class="config-section">
+                <label>Title</label>
+                <input type="text" id="config-title" value="{{ active_conversation.title }}"
+                       style="width:100%; padding:8px; border:1px solid #ddd; border-radius:6px; font-size:13px; outline:none;"
+                       onblur="saveConfig()">
+            </div>
+            <div class="config-section">
+                <label>Mode</label>
+                <div class="mode-toggle">
+                    <button class="mode-toggle-btn {% if active_conversation.mode != 'knowledge' %}active{% endif %}"
+                            id="config-mode-chat" onclick="setConfigMode('chat')">💬 Chat</button>
+                    <button class="mode-toggle-btn {% if active_conversation.mode == 'knowledge' %}active{% endif %}"
+                            id="config-mode-knowledge" onclick="setConfigMode('knowledge')">🧠 Knowledge</button>
+                </div>
+            </div>
+            <div class="config-section" id="config-kb-section" style="{% if active_conversation.mode != 'knowledge' %}display:none;{% endif %}">
+                <label>Knowledge Sources</label>
+                <div class="selected-tags" id="config-selected-tags">
+                    {% for sel in active_kb_selections %}
+                    <span class="selected-tag" id="config-tag-{{ sel.id }}">
+                        🌊 {{ sel.path }}
+                        <button onclick="removeConfigKB({{ sel.id }})">×</button>
+                    </span>
+                    {% endfor %}
+                    {% if not active_kb_selections %}
+                    <span style="color:#bbb; font-size:12px;" id="config-no-sources">No sources selected</span>
+                    {% endif %}
+                </div>
+                <input type="text" id="config-tree-search" placeholder="🔍 Search..."
+                       oninput="filterConfigTree()"
+                       style="width:100%; padding:6px 10px; border:1px solid #ddd; border-radius:6px; font-size:12px; outline:none; margin-bottom:6px;">
+                <div class="kb-tree" id="config-kb-tree" style="max-height:150px;">
+                    {% for kb in root_kbs %}
+                    <div class="kb-tree-item" data-kb-id="{{ kb.id }}" data-path="{{ kb.name }}" data-name="{{ kb.name }}"
+                         onclick="addConfigKB({{ kb.id }}, '{{ kb.name }}')">
+                        <span>🌊</span>
+                        <span>{{ kb.name }}</span>
+                    </div>
+                    {% if kb.children %}
+                    {% for child in kb.children %}
+                    <div class="kb-tree-item" data-kb-id="{{ child.id }}" data-path="{{ kb.name }} > {{ child.name }}" data-name="{{ child.name }}"
+                         style="padding-left:28px;"
+                         onclick="addConfigKB({{ child.id }}, '{{ kb.name }} > {{ child.name }}')">
+                        <span>💧</span>
+                        <span>{{ child.name }}</span>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
         <div id="messages">
             {% if not active_conversation %}
             <p id="empty-chat">Click "+ New Chat" to start a conversation</p>
@@ -178,7 +359,6 @@
         </div>
     </div>
 
-    <!-- DASHBOARD VIEW -->
     <div id="dashboard-view" class="kb-view-panel">
         <h1>📊 Dashboard</h1>
         <p class="subtitle">Explore your knowledge lakes and pools.</p>
@@ -201,7 +381,6 @@
         </div>
     </div>
 
-    <!-- MANAGE LAKES VIEW -->
     <div id="manage-view" class="kb-view-panel">
         <h1>🗂️ Manage Lakes</h1>
         <p class="subtitle">Create, rename, delete and export your knowledge lakes.</p>
@@ -219,24 +398,23 @@
                 <input type="checkbox" id="select-all-lakes" onclick="toggleSelectAllLakes()"> Select All
             </label>
         </div>
-
         <form id="new-lake-form" action="/kb/new" method="POST" style="display:none; gap:10px; margin-bottom:20px;">
             <input type="text" name="name" placeholder="New knowledge lake name..."
                    style="flex:1; padding:10px 14px; border:1px solid #ddd; border-radius:8px; font-size:14px; outline:none;" required>
             <input type="hidden" name="parent_id" value="">
             <button type="submit" class="toolbar-btn primary">+ Create</button>
         </form>
-
         <div class="lake-grid">
             {% for kb in kbs %}
             {% if not kb.parent_id %}
-            <div class="lake-card">
-                <input type="checkbox" class="card-checkbox lake-checkbox" data-kb-id="{{ kb.id }}">
+            <div class="lake-card" onclick="window.location.href='/kb/{{ kb.id }}'" style="cursor:pointer;">
+                <input type="checkbox" class="card-checkbox lake-checkbox" data-kb-id="{{ kb.id }}" onclick="event.stopPropagation()">
                 <div class="lake-card-icon">🌊</div>
                 <div class="lake-card-name" id="name-display-{{ kb.id }}">{{ kb.name }}</div>
                 <input type="text" class="rename-input" id="rename-input-{{ kb.id }}"
                        value="{{ kb.name }}" style="display:none;"
-                       onkeydown="if(event.key==='Enter') submitRename({{ kb.id }})">
+                       onkeydown="if(event.key==='Enter') submitRename({{ kb.id }})"
+                       onclick="event.stopPropagation()">
                 <div class="lake-card-meta">
                     <span>📄 {{ kb_stats[kb.id][2] }} file(s)</span>
                     <span>💧 {{ kb.children|length }} pool(s)</span>
@@ -244,39 +422,46 @@
                     <span>🕒 {{ kb_stats[kb.id][1] }}</span>
                 </div>
                 <div class="card-actions">
-                    <button class="card-action-btn" title="Rename" onclick="toggleRenameCard({{ kb.id }})">✏️</button>
-                    <button class="card-action-btn" title="Delete" onclick="deleteLake({{ kb.id }}, '{{ kb.name }}')">🗑️</button>
-                    <button class="card-action-btn" title="Open" onclick="window.location.href='/kb/{{ kb.id }}'">📂 Open</button>
+                    <button class="card-action-btn" onclick="event.stopPropagation(); toggleRenameCard({{ kb.id }})">✏️</button>
+                    <button class="card-action-btn" onclick="event.stopPropagation(); deleteLake({{ kb.id }}, '{{ kb.name }}')">🗑️</button>
                 </div>
             </div>
             {% endif %}
             {% endfor %}
         </div>
     </div>
-
 </div>
 
 <script>
     const conversationId = {{ active_conversation.id if active_conversation else 'null' }};
     let currentMode = 'chat';
     let currentKBView = 'dashboard';
+    let modalMode = 'chat';
+    let modalSelectedKBs = {};
+    let configSelectedKBs = {};
+    {% for sel in active_kb_selections %}
+    configSelectedKBs[{{ sel.id }}] = '{{ sel.path }}';
+    {% endfor %}
+
+    const modelNames = {
+        'gemini': '🌐 Google Gemini',
+        'groq': '⚡ Groq Llama',
+        'ollama': '🦙 Llama 3.2',
+        'gemma': '💎 Gemma 3'
+    };
 
     window.addEventListener('DOMContentLoaded', function() {
         const params = new URLSearchParams(window.location.search);
         const storedMode = sessionStorage.getItem('mode');
         const storedView = sessionStorage.getItem('kbview');
-
         if (params.get('mode') === 'kb' || storedMode === 'kb') {
             switchMode('kb');
             sessionStorage.removeItem('mode');
         }
-        const urlView = params.get('view');
-        if (urlView === 'manage' || storedView === 'manage') {
+        if (params.get('view') === 'manage' || storedView === 'manage') {
             switchKBView('manage');
             sessionStorage.removeItem('kbview');
         }
-
-        // Handle bulk delete queue
         const queue = JSON.parse(sessionStorage.getItem('delete_queue') || '[]');
         if (queue.length > 0) processDeleteQueue();
     });
@@ -309,7 +494,235 @@
     }
 
     function handleAction() {
-        if (currentMode === 'chat') window.location.href = '/conversation/new';
+        if (currentMode === 'chat') openNewChatModal();
+    }
+
+    function openNewChatModal() {
+        modalSelectedKBs = {};
+        modalMode = 'chat';
+        document.getElementById('new-chat-title').value = 'New Conversation';
+        document.getElementById('modal-mode-chat').classList.add('active');
+        document.getElementById('modal-mode-knowledge').classList.remove('active');
+        document.getElementById('kb-selector-section').style.display = 'none';
+        renderModalTags();
+        document.getElementById('new-chat-modal').classList.add('show');
+    }
+
+    function closeNewChatModal() {
+        document.getElementById('new-chat-modal').classList.remove('show');
+    }
+
+    function setModalMode(mode) {
+        modalMode = mode;
+        document.getElementById('modal-mode-chat').classList.toggle('active', mode === 'chat');
+        document.getElementById('modal-mode-knowledge').classList.toggle('active', mode === 'knowledge');
+        document.getElementById('kb-selector-section').style.display = mode === 'knowledge' ? 'block' : 'none';
+    }
+
+    function toggleModalKB(id, path, type) {
+        const key = String(id);
+        if (modalSelectedKBs[key]) {
+            delete modalSelectedKBs[key];
+        } else {
+            modalSelectedKBs[key] = { path, type };
+        }
+        renderModalTags();
+        document.querySelectorAll('#kb-tree .kb-tree-item').forEach(item => {
+            const itemId = item.dataset.fileId ? 'file_' + item.dataset.fileId : item.dataset.kbId;
+            if (String(itemId) === key) {
+                item.classList.toggle('selected', !!modalSelectedKBs[key]);
+            }
+        });
+    }
+
+    function removeModalKB(key) {
+        delete modalSelectedKBs[key];
+        renderModalTags();
+    }
+
+    function renderModalTags() {
+        const container = document.getElementById('selected-tags');
+        const keys = Object.keys(modalSelectedKBs);
+        if (keys.length === 0) {
+            container.innerHTML = '<span style="color:#bbb; font-size:13px; padding:4px 0;">No sources selected yet</span>';
+            return;
+        }
+        container.innerHTML = keys.map(key => {
+            const { path, type } = modalSelectedKBs[key];
+            const icon = type === 'file' ? '📄' : type === 'pool' ? '💧' : '🌊';
+            return `<span class="selected-tag">${icon} ${path} <button onclick="removeModalKB('${key}')">×</button></span>`;
+        }).join('');
+    }
+
+    function createNewChat() {
+        const title = document.getElementById('new-chat-title').value.trim() || 'New Conversation';
+        const kb_ids = [];
+        const file_ids = [];
+        Object.entries(modalSelectedKBs).forEach(([key, val]) => {
+            if (val.type === 'file') {
+                file_ids.push(parseInt(key.replace('file_', '')));
+            } else {
+                kb_ids.push(parseInt(key));
+            }
+        });
+        fetch('/conversation/new', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, mode: modalMode, kb_ids, file_ids })
+        })
+        .then(res => res.json())
+        .then(data => {
+            closeNewChatModal();
+            window.location.href = '/dashboard/' + data.conversation_id;
+        });
+    }
+
+    function toggleTreeNode(toggleEl) {
+        const treeNode = toggleEl.closest('.tree-node');
+        const children = treeNode.querySelector('.tree-children');
+        if (children) {
+            const isOpen = children.style.display !== 'none';
+            children.style.display = isOpen ? 'none' : 'block';
+            toggleEl.classList.toggle('open', !isOpen);
+        }
+    }
+
+    function filterKBTree() {
+        const query = document.getElementById('kb-tree-search').value.toLowerCase();
+        document.querySelectorAll('#kb-tree .kb-tree-item').forEach(item => {
+            item.style.display = item.dataset.name.toLowerCase().includes(query) ? 'flex' : 'none';
+        });
+    }
+
+    function filterConfigTree() {
+        const query = document.getElementById('config-tree-search').value.toLowerCase();
+        document.querySelectorAll('#config-kb-tree .kb-tree-item').forEach(item => {
+            item.style.display = item.dataset.name.toLowerCase().includes(query) ? 'flex' : 'none';
+        });
+    }
+
+    function toggleConfig() {
+        const panel = document.getElementById('config-panel');
+        panel.classList.toggle('show');
+    }
+
+    function setConfigMode(mode) {
+        document.getElementById('config-mode-chat').classList.toggle('active', mode === 'chat');
+        document.getElementById('config-mode-knowledge').classList.toggle('active', mode === 'knowledge');
+        document.getElementById('config-kb-section').style.display = mode === 'knowledge' ? 'block' : 'none';
+        saveConfig();
+    }
+
+    function addConfigKB(id, path) {
+        configSelectedKBs[id] = path;
+        renderConfigTags();
+        saveConfig();
+    }
+
+    function removeConfigKB(id) {
+        delete configSelectedKBs[id];
+        renderConfigTags();
+        saveConfig();
+    }
+
+    function renderConfigTags() {
+        const container = document.getElementById('config-selected-tags');
+        const ids = Object.keys(configSelectedKBs);
+        const noSrc = document.getElementById('config-no-sources');
+        if (noSrc) noSrc.remove();
+        if (ids.length === 0) {
+            container.innerHTML = '<span style="color:#bbb; font-size:12px;">No sources selected</span>';
+            return;
+        }
+        container.innerHTML = ids.map(id =>
+            `<span class="selected-tag" id="config-tag-${id}">🌊 ${configSelectedKBs[id]} <button onclick="removeConfigKB(${id})">×</button></span>`
+        ).join('');
+    }
+
+    function saveConfig() {
+        if (!conversationId) return;
+        const title = document.getElementById('config-title').value.trim();
+        const mode = document.getElementById('config-mode-knowledge').classList.contains('active') ? 'knowledge' : 'chat';
+        const kb_ids = Object.keys(configSelectedKBs).map(Number);
+        fetch('/conversation/' + conversationId + '/update', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, mode, kb_ids })
+        }).then(() => {
+            document.getElementById('chat-title').textContent = title;
+            const badge = document.getElementById('chat-mode-badge');
+            if (badge) {
+                badge.textContent = mode === 'knowledge' ? '🧠 Knowledge Mode' : '💬 Chat Mode';
+                badge.className = mode === 'knowledge' ? 'knowledge' : '';
+            }
+        });
+    }
+
+    document.addEventListener('click', function(e) {
+        const panel = document.getElementById('config-panel');
+        if (panel && !panel.contains(e.target) && !e.target.closest('.header-btn')) {
+            panel.classList.remove('show');
+        }
+    });
+
+    document.getElementById('message-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') sendMessage();
+    });
+
+    function sendMessage() {
+        const input = document.getElementById('message-input');
+        const message = input.value.trim();
+        if (!message || !conversationId) return;
+        appendMessage('user', message, null);
+        input.value = '';
+        input.disabled = true;
+        document.getElementById('send-btn').disabled = true;
+        const selectedModel = document.getElementById('model-selector').value;
+        fetch('/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                message: message,
+                conversation_id: conversationId,
+                model: selectedModel
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.response) {
+                const actualModel = data.model_used || selectedModel;
+                appendMessage('agent', data.response, modelNames[actualModel]);
+            } else {
+                appendMessage('agent', '⚠️ AI model unavailable.', modelNames[selectedModel]);
+            }
+        })
+        .catch(() => appendMessage('agent', '⚠️ Error connecting to AI model.', null))
+        .finally(() => {
+            input.disabled = false;
+            document.getElementById('send-btn').disabled = false;
+            input.focus();
+        });
+    }
+
+    function appendMessage(role, content, modelName) {
+        const messages = document.getElementById('messages');
+        const div = document.createElement('div');
+        div.className = 'message ' + role;
+        const modelTag = (role === 'agent' && modelName) ?
+            `<div class="model-tag">${modelName}</div>` : '';
+        div.innerHTML = modelTag + content
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/^### (.*$)/gm, '<br><strong>$1</strong><br>')
+            .replace(/^\* /gm, '• ')
+            .replace(/\n/g, '<br>');
+        messages.appendChild(div);
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    function deleteConv(id) {
+        if (confirm('Delete this conversation?')) {
+            window.location.href = '/conversation/' + id + '/delete';
+        }
     }
 
     function toggleNewLakeForm() {
@@ -352,7 +765,7 @@
     function deleteSelectedLakes() {
         const checked = document.querySelectorAll('.lake-checkbox:checked');
         if (checked.length === 0) { alert('Select at least one lake to delete.'); return; }
-        if (!confirm('Delete ' + checked.length + ' lake(s) and everything inside them?')) return;
+        if (!confirm('Delete ' + checked.length + ' lake(s)?')) return;
         const ids = Array.from(checked).map(cb => cb.dataset.kbId);
         sessionStorage.setItem('delete_queue', JSON.stringify(ids));
         sessionStorage.setItem('mode', 'kb');
@@ -374,65 +787,6 @@
         checked.forEach(cb => window.open('/kb/' + cb.dataset.kbId + '/export/all', '_blank'));
     }
 
-    document.getElementById('message-input').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') sendMessage();
-    });
-
-    function sendMessage() {
-        const input = document.getElementById('message-input');
-        const message = input.value.trim();
-        if (!message || !conversationId) return;
-        appendMessage('user', message);
-        input.value = '';
-        input.disabled = true;
-        document.getElementById('send-btn').disabled = true;
-        fetch('/chat', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                message: message,
-                conversation_id: conversationId,
-                model: document.getElementById('model-selector').value
-            })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.response) {
-                appendMessage('agent', data.response);
-            } else {
-                const modelName = document.getElementById('model-selector').options[document.getElementById('model-selector').selectedIndex].text;
-                appendMessage('agent', `⚠️ ${modelName} is currently unavailable.`);
-            }
-        })
-        .catch(() => {
-            appendMessage('agent', '⚠️ Error connecting to AI model.');
-        })
-        .finally(() => {
-            input.disabled = false;
-            document.getElementById('send-btn').disabled = false;
-            input.focus();
-        });
-    }
-
-    function appendMessage(role, content) {
-        const messages = document.getElementById('messages');
-        const div = document.createElement('div');
-        div.className = 'message ' + role;
-        div.innerHTML = content
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-            .replace(/^### (.*$)/gm, '<br><strong>$1</strong><br>')
-            .replace(/^\* /gm, '• ')
-            .replace(/\n/g, '<br>');
-        messages.appendChild(div);
-        messages.scrollTop = messages.scrollHeight;
-    }
-
-    function deleteConv(id) {
-        if (confirm('Delete this conversation?')) {
-            window.location.href = '/conversation/' + id + '/delete';
-        }
-    }
-
     function filterDashboard() {
         const query = document.getElementById('dashboard-search').value.toLowerCase();
         document.querySelectorAll('#dashboard-view .lake-card').forEach(card => {
@@ -448,9 +802,6 @@
             card.style.display = name.includes(query) ? 'block' : 'none';
         });
     }
-
-
-
 </script>
 
 </body>
