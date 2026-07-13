@@ -1,3 +1,0 @@
-﻿Loading embedding model...
-Embedding model loaded.
-Total words: 1594

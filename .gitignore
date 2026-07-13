@@ -6,3 +6,6 @@ instance/
 *.db
 uploads/
 instance/
+embeddings/
+debug2.txt
+debug_output.txt
